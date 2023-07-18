@@ -1,0 +1,37 @@
+{
+  "createTime": 1689660854848,
+  "updateTime": 1689594901965,
+  "accessPolicy": {},
+  "name": "CarOrderWorkflow",
+  "description": "Car Order Workflow",
+  "version": 1,
+  "tasks": [
+    {
+      "name": "CheckOrderIsValidWorker",
+      "taskReferenceName": "Check that the order is valid",
+      "inputParameters": {
+        "stuff": {
+          "foo": "Foo is foo",
+          "bar": "Bar is bar"
+        }
+      },
+      "type": "SIMPLE",
+      "startDelay": 0,
+      "optional": false,
+      "asyncComplete": false
+    }
+  ],
+  "inputParameters": [],
+  "outputParameters": {
+    "data": "${get_population_data.output.response.body.data}",
+    "source": "${get_population_data.output.response.body.source}"
+  },
+  "schemaVersion": 2,
+  "restartable": true,
+  "workflowStatusListenerEnabled": false,
+  "ownerEmail": "example@email.com",
+  "timeoutPolicy": "ALERT_ONLY",
+  "timeoutSeconds": 0,
+  "variables": {},
+  "inputTemplate": {}
+}

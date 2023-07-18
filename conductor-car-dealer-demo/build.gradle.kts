@@ -13,9 +13,15 @@ repositories {
 }
 
 dependencies {
-    testImplementation(kotlin("test"))
+
     implementation("com.netflix.conductor:conductor-client:3.13.7")
+    implementation("com.netflix.conductor:conductor-common:3.13.7")
+
+    testImplementation("com.netflix.conductor:conductor-server:3.13.7")
+    testImplementation(kotlin("test"))
 }
+
+
 
 tasks.test {
     useJUnitPlatform()
