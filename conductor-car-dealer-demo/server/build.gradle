@@ -52,18 +52,19 @@ dependencies {
         exclude group: 'org.apache.logging.log4j', module: 'log4j-slf4j-impl'
         exclude group: 'org.apache.logging.log4j', module: 'log4j-jul'
         exclude group: 'org.apache.logging.log4j', module: 'log4j-to-slf4j'
+        exclude group: 'org.apache.logging.log4j', module: 'log4j-web'
     }
 
-    implementation "org.springdoc:springdoc-openapi-ui:${revOpenapi}"
+    implementation 'org.springdoc:springdoc-openapi-ui:1.6.15'
 
-    runtimeOnly "org.glassfish.jaxb:jaxb-runtime:${revJAXB}"
+    runtimeOnly 'org.glassfish.jaxb:jaxb-runtime:2.3.3'
 
 //    testImplementation project(':conductor-rest')
 //    testImplementation project(':conductor-common')
-    testImplementation "io.grpc:grpc-testing:${revGrpc}"
-    testImplementation "com.google.protobuf:protobuf-java:${revProtoBuf}"
-    testImplementation "io.grpc:grpc-protobuf:${revGrpc}"
-    testImplementation "io.grpc:grpc-stub:${revGrpc}"
+    testImplementation 'io.grpc:grpc-testing:1.57.1'
+    testImplementation 'com.google.protobuf:protobuf-java:3.13.0'
+    testImplementation 'io.grpc:grpc-protobuf:1.57.1'
+    testImplementation 'io.grpc:grpc-stub:1.57.1'
 }
 
 test {
