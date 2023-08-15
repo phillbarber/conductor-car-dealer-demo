@@ -23,6 +23,8 @@ repositories {
 
 dependencies {
 
+    implementation 'com.github.kstyrc:embedded-redis:0.6'
+
     implementation 'com.netflix.conductor:conductor-rest:3.13.8'
     implementation 'com.netflix.conductor:conductor-core:3.13.8'
     implementation 'com.netflix.conductor:conductor-redis-persistence:3.13.8'
