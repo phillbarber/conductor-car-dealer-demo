@@ -12,7 +12,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.core.io.FileSystemResource;
-import redis.embedded.RedisServer;
 
 // Prevents from the datasource beans to be loaded, AS they are needed only for specific databases.
 // In case that SQL database is selected this class will be imported back in the appropriate
@@ -24,11 +23,6 @@ public class Conductor {
     private static final Logger log = LoggerFactory.getLogger(Conductor.class);
 
     public static void main(String[] args) throws IOException {
-
-
-        RedisServer redisServer = new RedisServer(6379);
-        redisServer.start();
-
         loadExternalConfig();
 
         SpringApplication.run(Conductor.class, args);
