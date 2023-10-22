@@ -1,4 +1,0 @@
-
-rootProject.name = "conductor-car-dealer-demo"
-include 'server'
-include 'car-dealer'
