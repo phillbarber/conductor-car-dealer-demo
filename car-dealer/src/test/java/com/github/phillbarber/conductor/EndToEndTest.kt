@@ -12,6 +12,18 @@ import org.testcontainers.utility.DockerImageName
 class EndToEndTest {
 
 
+    /*
+    Idea for workflow
+
+    1. Check Order is Valid - checkOrder - returns validBoolean and message
+    2. Get Customer Details - getCustomer - returns customerName and loyaltyPoints
+    3. Get Base Price       - getBasePrice - returns price for car and customer
+    4. Get Extra Price      - getPriceForExtras - takes car and extras
+    5. Discount Service     - getDiscount - returns an amount less
+    6. Save Order           - saveOrder   - saves order to DB
+    Returns Valid order with price
+     */
+
     @Container
     var redis = GenericContainer(DockerImageName.parse("redis:5.0.3-alpine"))
         .withExposedPorts(6379)
