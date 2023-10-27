@@ -1,2 +1,4 @@
 rootProject.name = 'conductor-car-dealer-demo'
 include 'car-dealer'
+include 'car-dealer-stubs'
+

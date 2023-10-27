@@ -22,6 +22,34 @@ class EndToEndTest {
     5. Discount Service     - getDiscount - returns an amount less
     6. Save Order           - saveOrder   - saves order to DB
     Returns Valid order with price
+
+    input:
+
+    order
+     car
+      make
+      model
+      extras
+
+    customer
+     id
+
+
+     returns:
+
+      order
+       id
+       price
+        basePrice
+        extraPrice
+        saving
+       car
+        make
+        model
+        extras
+
+
+
      */
 
     @Container
