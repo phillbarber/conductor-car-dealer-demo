@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.testcontainers.containers.GenericContainer
 import org.testcontainers.containers.Network
+import org.testcontainers.containers.Network.NetworkImpl
 import org.testcontainers.containers.output.OutputFrame
 import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
@@ -56,6 +57,7 @@ class EndToEndTest {
 
     var network = Network.newNetwork()
 
+
     @Container
     var redis = GenericContainer(DockerImageName.parse("redis:5.0.3-alpine"))
         .withExposedPorts(6379)
@@ -69,17 +71,18 @@ class EndToEndTest {
         .withEnv("discovery.type", "single-node")
         .withEnv("xpack.security.enabled", "false")
         .withEnv("ES_JAVA_OPTS", "-Xms512m -Xmx1024m")
-        //.withExposedPorts(9200, 9300)
+        .withExposedPorts(9200, 9300)
         .withNetwork(network)
         .withNetworkAliases("es")
 
 
+    //Not specifying the config properties file
     @Container //dont forget .withExposedPorts(8080)
-    var conductorServer = GenericContainer(DockerImageName.parse("eclipse-temurin:11-jre-focal"))
+    var conductorServer = GenericContainer(DockerImageName.parse("conductor:server"))
         .withNetwork(network)
-        .withCreateContainerCmdModifier(
-        { it -> it.withCmd("sleep", "10") }
-    )
+//        .withCreateContainerCmdModifier(
+//        { it -> it.withCmd("sleep", "100") }
+//    )
 
 
 
@@ -90,7 +93,7 @@ class EndToEndTest {
 
 
 
-        for (i in 1..17){
+        for (i in 1..170){
 
 //            printContainerDetails(redis)
 //            println("Ooohh weee")
