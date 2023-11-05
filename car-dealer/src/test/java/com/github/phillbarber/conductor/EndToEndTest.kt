@@ -62,19 +62,22 @@ class EndToEndTest {
         .withNetwork(network)
         .withNetworkAliases("rs")
 
+
     @Container
     var elasticSearch = GenericContainer(DockerImageName.parse("elasticsearch:6.8.15"))
         .withEnv("transport.host", "0.0.0.0")
         .withEnv("discovery.type", "single-node")
         .withEnv("xpack.security.enabled", "false")
         .withEnv("ES_JAVA_OPTS", "-Xms512m -Xmx1024m")
-        .withExposedPorts(9200, 9300)
+        //.withExposedPorts(9200, 9300)
         .withNetwork(network)
         .withNetworkAliases("es")
 
 
     @Container //dont forget .withExposedPorts(8080)
-    var conductorServer = GenericContainer(DockerImageName.parse("eclipse-temurin:11-jre-focal")).withNetwork(network).withCreateContainerCmdModifier(
+    var conductorServer = GenericContainer(DockerImageName.parse("eclipse-temurin:11-jre-focal"))
+        .withNetwork(network)
+        .withCreateContainerCmdModifier(
         { it -> it.withCmd("sleep", "10") }
     )
 
@@ -93,6 +96,8 @@ class EndToEndTest {
 //            println("Ooohh weee")
 //            printContainerDetails(elasticSearch)
 //            println("Ooohh weee")
+            printContainerDetails(i, redis)
+            printContainerDetails(i, elasticSearch)
             printContainerDetails(i, conductorServer)
 
             Thread.sleep(1000)
@@ -107,12 +112,14 @@ class EndToEndTest {
 
     }
 
+
+
     private fun printContainerDetails(i: Int, container: GenericContainer<*>) {
         println("Number $i")
         println("The Container is running: " + container.isRunning())
         println("The Container name is: " + container.getContainerName())
         println(container.getLogs(OutputFrame.OutputType.STDERR))
-        println(container.getLogs(OutputFrame.OutputType.STDOUT))
+        //println(container.getLogs(OutputFrame.OutputType.STDOUT))
         //println(container.())
         println("The Container image is: " + container.getImage().toString())
 
