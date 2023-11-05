@@ -2,9 +2,9 @@ package com.github.phillbarber.conductor
 
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import org.testcontainers.containers.FixedHostPortGenericContainer
 import org.testcontainers.containers.GenericContainer
 import org.testcontainers.containers.Network
+import org.testcontainers.containers.output.OutputFrame
 import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
 import org.testcontainers.utility.DockerImageName
@@ -64,7 +64,7 @@ class EndToEndTest {
 
     @Container
     var elasticSearch = GenericContainer(DockerImageName.parse("elasticsearch:6.8.15"))
-        .withEnv("ransport.host", "0.0.0.0")
+        .withEnv("transport.host", "0.0.0.0")
         .withEnv("discovery.type", "single-node")
         .withEnv("xpack.security.enabled", "false")
         .withEnv("ES_JAVA_OPTS", "-Xms512m -Xmx1024m")
@@ -73,8 +73,10 @@ class EndToEndTest {
         .withNetworkAliases("es")
 
 
-//    @Container
-//    var conductorServer = GenericContainer(DockerImageName.parse("conductor:server")).withExposedPorts(8080).withNetwork(network)
+    @Container //dont forget .withExposedPorts(8080)
+    var conductorServer = GenericContainer(DockerImageName.parse("eclipse-temurin:11-jre-focal")).withNetwork(network).withCreateContainerCmdModifier(
+        { it -> it.withCmd("sleep", "10") }
+    )
 
 
 
@@ -82,18 +84,37 @@ class EndToEndTest {
     @Test
     fun stuff(){
         assertTrue(true)
-        val address: String = redis.host
-        val port: Int = redis.firstMappedPort
 
-        System.out.println("NICE")
-        System.out.println("${redis.host} ")
-        System.out.println("${elasticSearch.host} ")
-        System.out.println(" ${redis.firstMappedPort} ")
-        System.out.println(" ${elasticSearch.firstMappedPort} ")
-        System.out.println(" ${redis.firstMappedPort} ")
-        System.out.println("YAY")
-        Thread.sleep(10000)
 
+
+        for (i in 1..17){
+
+//            printContainerDetails(redis)
+//            println("Ooohh weee")
+//            printContainerDetails(elasticSearch)
+//            println("Ooohh weee")
+            printContainerDetails(i, conductorServer)
+
+            Thread.sleep(1000)
+            println("\n")
+            println("\n")
+        }
+
+
+
+
+
+
+    }
+
+    private fun printContainerDetails(i: Int, container: GenericContainer<*>) {
+        println("Number $i")
+        println("The Container is running: " + container.isRunning())
+        println("The Container name is: " + container.getContainerName())
+        println(container.getLogs(OutputFrame.OutputType.STDERR))
+        println(container.getLogs(OutputFrame.OutputType.STDOUT))
+        //println(container.())
+        println("The Container image is: " + container.getImage().toString())
 
     }
 }
