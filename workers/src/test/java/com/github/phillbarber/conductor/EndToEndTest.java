@@ -74,7 +74,7 @@ public class EndToEndTest {
 
 
     //Not specifying the config properties file
-    @Container //dont forget .withExposedPorts(8080)
+    @Container
     private GenericContainer conductorServer = new GenericContainer(DockerImageName.parse("conductor:server"))
         .withEnv("CONFIG_PROP", "config-local.properties")//this corresponds to https://github.com/Netflix/conductor/blob/f013a53b345b21e890790c8b7a316a34d992fc2e/docker/server/config/config-local.properties
         .withExposedPorts(8080)
