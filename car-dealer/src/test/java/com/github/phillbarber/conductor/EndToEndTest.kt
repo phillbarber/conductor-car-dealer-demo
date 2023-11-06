@@ -79,12 +79,8 @@ class EndToEndTest {
     //Not specifying the config properties file
     @Container //dont forget .withExposedPorts(8080)
     var conductorServer = GenericContainer(DockerImageName.parse("conductor:server"))
+        .withEnv("CONFIG_PROP", "config-local.properties")//this corresponds to https://github.com/Netflix/conductor/blob/f013a53b345b21e890790c8b7a316a34d992fc2e/docker/server/config/config-local.properties
         .withNetwork(network)
-//        .withCreateContainerCmdModifier(
-//        { it -> it.withCmd("sleep", "100") }
-//    )
-
-
 
 
     @Test
@@ -122,8 +118,6 @@ class EndToEndTest {
         println("The Container is running: " + container.isRunning())
         println("The Container name is: " + container.getContainerName())
         println(container.getLogs(OutputFrame.OutputType.STDERR))
-        //println(container.getLogs(OutputFrame.OutputType.STDOUT))
-        //println(container.())
         println("The Container image is: " + container.getImage().toString())
 
     }
