@@ -4,7 +4,6 @@ import com.github.phillbarber.conductor.workers.*;
 import com.netflix.conductor.client.automator.TaskRunnerConfigurer;
 import com.netflix.conductor.client.http.TaskClient;
 import com.netflix.conductor.client.worker.Worker;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.List;
@@ -26,7 +25,6 @@ public class Launcher {
         configurer.init();
     }
 
-    @NotNull
     private static List<Worker> getWorkers() {
         List<Worker> workers = Arrays.asList(
                 new CheckOrderIsValidWorker(),
@@ -38,7 +36,6 @@ public class Launcher {
         return workers;
     }
 
-    @NotNull
     private static TaskClient createClient() {
         TaskClient taskClient = new TaskClient();
         taskClient.setRootURI("http://localhost:8080/api/"); // Point this to the server API
