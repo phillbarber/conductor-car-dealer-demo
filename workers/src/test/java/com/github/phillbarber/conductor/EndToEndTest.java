@@ -1,11 +1,14 @@
 package com.github.phillbarber.conductor;
 
+import com.github.phillbarber.conductor.facade.FacadeLanucher;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
 @Testcontainers
@@ -25,7 +28,12 @@ public class EndToEndTest {
 
     @Test
     public void stuff() throws InterruptedException {
-        Thread.sleep(100000);
+        FacadeLanucher.main(null);
+        assertTrue(redis.isRunning());
+        assertTrue(conductorServer.isRunning());
+        assertTrue(elastic.isRunning());
+
+
     }
 
     private GenericContainer getRedisContainer() {

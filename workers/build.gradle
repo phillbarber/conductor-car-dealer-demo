@@ -19,6 +19,7 @@ dependencies {
 
     implementation 'com.netflix.conductor:conductor-client:3.13.8'
     implementation 'com.netflix.conductor:conductor-common:3.13.8'
+    implementation project(':facade')
 
 }
 
