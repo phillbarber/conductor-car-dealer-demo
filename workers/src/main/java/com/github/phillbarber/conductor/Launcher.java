@@ -10,6 +10,46 @@ import java.util.List;
 
 public class Launcher {
 
+
+    /*
+    Idea for workflow
+
+    1. Check Order is Valid - checkOrder - returns validBoolean and message
+    2. Get Customer Details - getCustomer - returns customerName and loyaltyPoints
+    3. Get Base Price       - getBasePrice - returns price for car and customer
+    4. Get Extra Price      - getPriceForExtras - takes car and extras
+    5. Discount Service     - getDiscount - returns an amount less
+    6. Save Order           - saveOrder   - saves order to DB
+    Returns Valid order with price
+
+    input:
+
+    order
+     car
+      make
+      model
+      extras
+
+    customer
+     id
+
+
+     returns:
+
+      order
+       id
+       price
+        basePrice
+        extraPrice
+        saving
+       car
+        make
+        model
+        extras
+
+
+
+     */
     public static void main(String[] args) {
         TaskClient taskClient = createClient();
         List<Worker> workers = getWorkers();
@@ -25,6 +65,8 @@ public class Launcher {
         configurer.init();
     }
 
+
+
     private static List<Worker> getWorkers() {
         List<Worker> workers = Arrays.asList(
                 new CheckOrderIsValidWorker(),
@@ -38,7 +80,7 @@ public class Launcher {
 
     private static TaskClient createClient() {
         TaskClient taskClient = new TaskClient();
-        taskClient.setRootURI("http://localhost:8080/api/"); // Point this to the server API
+        taskClient.setRootURI("http://localhost:32791/api/"); // This needs to get the port dynamically
         return taskClient;
     }
 
