@@ -1,4 +1,4 @@
 rootProject.name = 'conductor-car-dealer-demo'
 include 'workers'
-include 'car-dealer-stubs'
+include 'stubs'
 
