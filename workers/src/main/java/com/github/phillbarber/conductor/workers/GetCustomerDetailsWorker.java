@@ -8,7 +8,7 @@ public class GetCustomerDetailsWorker implements Worker {
 
     @Override
     public String getTaskDefName() {
-        return this.getClass().getName();
+        return "GetCustomerDetails";
     }
 
     @Override

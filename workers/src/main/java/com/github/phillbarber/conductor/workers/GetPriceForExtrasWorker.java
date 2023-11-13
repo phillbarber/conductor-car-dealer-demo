@@ -8,7 +8,7 @@ public class GetPriceForExtrasWorker implements Worker {
 
     @Override
     public String getTaskDefName() {
-        return this.getClass().getName();
+        return "GetPriceForExtras";
     }
 
     @Override

@@ -2,8 +2,12 @@ package com.github.phillbarber.conductor;
 
 import com.github.phillbarber.conductor.workers.*;
 import com.netflix.conductor.client.automator.TaskRunnerConfigurer;
+import com.netflix.conductor.client.http.MetadataClient;
 import com.netflix.conductor.client.http.TaskClient;
+import com.netflix.conductor.client.http.WorkflowClient;
 import com.netflix.conductor.client.worker.Worker;
+import com.netflix.conductor.common.metadata.workflow.StartWorkflowRequest;
+import com.netflix.conductor.common.metadata.workflow.WorkflowDef;
 
 import java.util.Arrays;
 import java.util.List;
@@ -51,10 +55,18 @@ public class Launcher {
 
      */
     public static void main(String[] args) {
-        TaskClient taskClient = createClient();
+        TaskClient taskClient = createClient(args[0]);
         List<Worker> workers = getWorkers();
 
         startTaskRunner(taskClient, workers);
+
+        MetadataClient metadataClient = new MetadataClient();
+        metadataClient.setRootURI(args[0]);
+
+        WorkflowDef workflowDef = new WorkflowDef();
+
+        metadataClient.registerWorkflowDef(workflowDef);
+
     }
 
     private static void startTaskRunner(TaskClient taskClient, List<Worker> workers) {
@@ -78,9 +90,9 @@ public class Launcher {
         return workers;
     }
 
-    private static TaskClient createClient() {
+    private static TaskClient createClient(String rootURI) {
         TaskClient taskClient = new TaskClient();
-        taskClient.setRootURI("http://localhost:32791/api/"); // This needs to get the port dynamically
+        taskClient.setRootURI(rootURI); // This needs to get the port dynamically
         return taskClient;
     }
 

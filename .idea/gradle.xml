@@ -9,8 +9,9 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
-            <option value="$PROJECT_DIR$/car-dealer" />
-            <option value="$PROJECT_DIR$/car-dealer-stubs" />
+            <option value="$PROJECT_DIR$/facade" />
+            <option value="$PROJECT_DIR$/stubs" />
+            <option value="$PROJECT_DIR$/workers" />
           </set>
         </option>
       </GradleProjectSettings>

@@ -7,7 +7,7 @@
   "version": 1,
   "tasks": [
     {
-      "name": "CheckOrderIsValidWorker",
+      "name": "CheckOrderIsValid",
       "taskReferenceName": "Check that the order is valid",
       "inputParameters": {
         "stuff": {

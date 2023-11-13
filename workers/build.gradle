@@ -10,17 +10,15 @@ repositories {
 }
 
 dependencies {
-    testImplementation platform('org.junit:junit-bom:5.9.1')
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.9.1'
-
-    testImplementation 'org.testcontainers:testcontainers:1.19.1'
-    testImplementation 'org.testcontainers:junit-jupiter:1.19.1'
-
 
     implementation 'com.netflix.conductor:conductor-client:3.13.8'
     implementation 'com.netflix.conductor:conductor-common:3.13.8'
     implementation project(':facade')
 
+    testImplementation platform('org.junit:junit-bom:5.9.1')
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.9.1'
+    testImplementation 'org.testcontainers:testcontainers:1.19.1'
+    testImplementation 'org.testcontainers:junit-jupiter:1.19.1'
 }
 
 test {

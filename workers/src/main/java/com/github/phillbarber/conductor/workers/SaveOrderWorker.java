@@ -8,7 +8,7 @@ public class SaveOrderWorker implements Worker {
 
     @Override
     public String getTaskDefName() {
-        return this.getClass().getName();
+        return "SaveOrder";
     }
 
     @Override

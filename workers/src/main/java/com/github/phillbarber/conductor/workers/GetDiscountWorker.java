@@ -8,7 +8,7 @@ public class GetDiscountWorker implements Worker {
 
     @Override
     public String getTaskDefName() {
-        return this.getClass().getName();
+        return "GetDiscount";
     }
 
     @Override

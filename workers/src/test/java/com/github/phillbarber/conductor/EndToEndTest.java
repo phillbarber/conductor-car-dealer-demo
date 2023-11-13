@@ -1,12 +1,17 @@
 package com.github.phillbarber.conductor;
 
 import com.github.phillbarber.conductor.facade.FacadeLanucher;
+import com.netflix.conductor.client.http.WorkflowClient;
+import com.netflix.conductor.common.metadata.workflow.StartWorkflowRequest;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
+
+import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -25,15 +30,32 @@ public class EndToEndTest {
     @Container
     private GenericContainer conductorServer = getConductorContainer();
 
+    @Container
+    private GenericContainer conductorUI = getConductorUIContainer();
 
     @Test
-    public void stuff() throws InterruptedException {
-        FacadeLanucher.main(null);
+    public void stuff() throws InterruptedException, IOException {
         assertTrue(redis.isRunning());
         assertTrue(conductorServer.isRunning());
         assertTrue(elastic.isRunning());
+        assertTrue(conductorUI.isRunning());
+
+        //FacadeLanucher.main(null);
+        Launcher.main(new String[]{getConductorServerURL()});
+        StartWorkflowRequest startWorkflowRequest = new StartWorkflowRequest();
 
 
+
+        WorkflowClient workflowClient = new WorkflowClient();
+        workflowClient.setRootURI(getConductorServerURL());
+        workflowClient.startWorkflow(startWorkflowRequest);
+        Thread.sleep(100000);
+
+    }
+
+    @NotNull
+    private String getConductorServerURL() {
+        return "http://localhost:" + conductorServer.getMappedPort(8080) + "/";
     }
 
     private GenericContainer getRedisContainer() {
@@ -43,6 +65,13 @@ public class EndToEndTest {
                 .withNetworkAliases("rs");
     }
 
+
+    private GenericContainer getConductorUIContainer() {
+        return new GenericContainer(DockerImageName.parse("conductor:ui"))
+                .withExposedPorts(5000, 5000)
+                .withNetwork(network);
+
+    }
 
     private GenericContainer getElasticSearchContainer() {
         return new GenericContainer(DockerImageName.parse("elasticsearch:6.8.15"))
