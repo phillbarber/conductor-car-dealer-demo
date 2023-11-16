@@ -41,15 +41,17 @@ public class EndToEndTest {
         assertTrue(conductorUI.isRunning());
 
         //FacadeLanucher.main(null);
-        Launcher.main(new String[]{getConductorServerURL()});
+        String conductorServerURL = getConductorServerURL();
+        new Thread(() -> Launcher.main(new String[]{conductorServerURL})).start();
+
         StartWorkflowRequest startWorkflowRequest = new StartWorkflowRequest();
 
 
 
-        WorkflowClient workflowClient = new WorkflowClient();
-        workflowClient.setRootURI(getConductorServerURL());
-        workflowClient.startWorkflow(startWorkflowRequest);
-        Thread.sleep(100000);
+//        WorkflowClient workflowClient = new WorkflowClient();
+//        workflowClient.setRootURI(getConductorServerURL());
+//        workflowClient.startWorkflow(startWorkflowRequest);
+        Thread.sleep(1000000);
 
     }
 
@@ -59,7 +61,7 @@ public class EndToEndTest {
     }
 
     private GenericContainer getRedisContainer() {
-        return new GenericContainer(DockerImageName.parse("redis:5.0.3-alpine"))
+        return new GenericContainer(DockerImageName.parse("redis:6.2.3-alpine"))
                 .withExposedPorts(6379)
                 .withNetwork(network)
                 .withNetworkAliases("rs");
