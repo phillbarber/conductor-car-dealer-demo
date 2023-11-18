@@ -1,17 +1,20 @@
 package com.github.phillbarber.conductor;
 
-import com.github.phillbarber.conductor.facade.FacadeLanucher;
+import com.netflix.conductor.client.http.MetadataClient;
 import com.netflix.conductor.client.http.WorkflowClient;
 import com.netflix.conductor.common.metadata.workflow.StartWorkflowRequest;
+import com.netflix.conductor.common.metadata.workflow.WorkflowDef;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 import org.testcontainers.utility.DockerImageName;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -19,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @Testcontainers
 public class EndToEndTest {
 
+    public static final String WORKFLOW_JSON_FILE = "workflows/car-order-workflow.json";
     private Network network = Network.newNetwork();
 
     @Container
@@ -42,22 +46,36 @@ public class EndToEndTest {
 
         //FacadeLanucher.main(null);
         String conductorServerURL = getConductorServerURL();
-        new Thread(() -> Launcher.main(new String[]{conductorServerURL})).start();
+
 
         StartWorkflowRequest startWorkflowRequest = new StartWorkflowRequest();
+        startWorkflowRequest.setName("CarOrderWorkflow");
 
 
 
-//        WorkflowClient workflowClient = new WorkflowClient();
-//        workflowClient.setRootURI(getConductorServerURL());
-//        workflowClient.startWorkflow(startWorkflowRequest);
+
+        MetadataClient metadataClient = new MetadataClient();
+        metadataClient.setRootURI(getConductorServerURL());
+        metadataClient.registerWorkflowDef(getWorkflowDef());
+
+        new Thread(() -> Launcher.main(new String[]{conductorServerURL})).start();
+
+        WorkflowClient workflowClient = new WorkflowClient();
+        workflowClient.setRootURI(getConductorServerURL());
+        workflowClient.startWorkflow(startWorkflowRequest);
         Thread.sleep(1000000);
 
     }
 
     @NotNull
     private String getConductorServerURL() {
-        return "http://localhost:" + conductorServer.getMappedPort(8080) + "/";
+        return "http://localhost:" + conductorServer.getMappedPort(8080) + "/api/";
+    }
+
+
+    private WorkflowDef getWorkflowDef() throws IOException {
+        InputStream resourceAsStream = this.getClass().getClassLoader().getResourceAsStream(WORKFLOW_JSON_FILE);
+        return new ObjectMapper().readValue(resourceAsStream, WorkflowDef.class);
     }
 
     private GenericContainer getRedisContainer() {

@@ -60,13 +60,6 @@ public class Launcher {
 
         startTaskRunner(taskClient, workers);
 
-        MetadataClient metadataClient = new MetadataClient();
-        metadataClient.setRootURI(args[0]);
-
-        WorkflowDef workflowDef = new WorkflowDef();
-
-        metadataClient.registerWorkflowDef(workflowDef);
-
     }
 
     private static void startTaskRunner(TaskClient taskClient, List<Worker> workers) {
