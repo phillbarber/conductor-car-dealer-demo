@@ -88,6 +88,7 @@ public class EndToEndTest {
 
     private GenericContainer getConductorUIContainer() {
         return new GenericContainer(DockerImageName.parse("conductor:ui"))
+                .withEnv("WF_SERVER", "http://conductor-server:8080")
                 .withExposedPorts(5000, 5000)
                 .withNetwork(network);
 
