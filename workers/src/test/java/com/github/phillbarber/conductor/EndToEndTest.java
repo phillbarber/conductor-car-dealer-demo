@@ -111,6 +111,7 @@ public class EndToEndTest {
         return new GenericContainer(DockerImageName.parse("conductor:server"))
                 .withEnv("CONFIG_PROP", "config-local.properties")//this corresponds to https://github.com/Netflix/conductor/blob/f013a53b345b21e890790c8b7a316a34d992fc2e/docker/server/config/config-local.properties
                 .withExposedPorts(8080)
+                .withNetworkAliases("conductor-server")
                 .withNetwork(network);
     }
 
