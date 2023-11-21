@@ -24,6 +24,6 @@ public class CheckOrderIsValidWorker implements Worker {
         result.getOutputData().put("baz", "boz");
         result.getOutputData().put("number", 4);
 
-        return new TaskResult(task);
+        return result;
     }
 }

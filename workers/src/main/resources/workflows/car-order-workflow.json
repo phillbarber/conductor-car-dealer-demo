@@ -8,7 +8,7 @@
   "tasks": [
     {
       "name": "CheckOrderIsValid",
-      "taskReferenceName": "Check that the order is valid",
+      "taskReferenceName": "CheckOrderIsValidRef",
       "inputParameters": {
         "stuff": {
           "foo": "Foo is foo",
@@ -19,12 +19,22 @@
       "startDelay": 0,
       "optional": false,
       "asyncComplete": false
+    },
+    {
+      "name": "SaveOrder",
+      "taskReferenceName": "SaveOrderRef",
+      "inputParameters": {
+
+      },
+      "type": "SIMPLE",
+      "startDelay": 0,
+      "optional": false,
+      "asyncComplete": false
     }
   ],
   "inputParameters": [],
   "outputParameters": {
-    "data": "${get_population_data.output.response.body.data}",
-    "source": "${get_population_data.output.response.body.source}"
+    "orderId": "${SaveOrderRef.output.orderId}"
   },
   "schemaVersion": 2,
   "restartable": true,

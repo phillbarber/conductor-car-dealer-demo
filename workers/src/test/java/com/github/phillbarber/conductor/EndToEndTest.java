@@ -4,6 +4,7 @@ import com.netflix.conductor.client.http.MetadataClient;
 import com.netflix.conductor.client.http.WorkflowClient;
 import com.netflix.conductor.common.metadata.workflow.StartWorkflowRequest;
 import com.netflix.conductor.common.metadata.workflow.WorkflowDef;
+import com.netflix.conductor.common.run.Workflow;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.GenericContainer;
@@ -15,6 +16,7 @@ import org.testcontainers.utility.DockerImageName;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -44,27 +46,56 @@ public class EndToEndTest {
         assertTrue(elastic.isRunning());
         assertTrue(conductorUI.isRunning());
 
-        //FacadeLanucher.main(null);
-        String conductorServerURL = getConductorServerURL();
 
+        initialiseWorkflow();
 
+        startWorkers(getConductorServerURL());
+
+        String workflowId = startWorkflow();
+
+        for (int i =0 ; i<10 ; i++){
+            Workflow workflow = getWorkflowClient().getWorkflow(workflowId, true);
+            if (workflow.getStatus() == Workflow.WorkflowStatus.COMPLETED){
+                Object orderId = workflow.getOutput().get("orderId");
+                System.out.println("The order id is " + orderId);
+            }
+            System.out.println("Trying " + i);
+            System.out.println(workflow);
+            Thread.sleep(1000);
+        }
+
+        Thread.sleep(1000000);
+
+    }
+
+    private void startWorkers(String conductorServerURL) {
+        new Thread(() -> Launcher.main(new String[]{conductorServerURL})).start();
+    }
+
+    private String startWorkflow() {
+        WorkflowClient workflowClient = getWorkflowClient();
+        return workflowClient.startWorkflow(getStartWorkflowRequest());
+    }
+
+    @NotNull
+    private WorkflowClient getWorkflowClient() {
+        WorkflowClient workflowClient = new WorkflowClient();
+        workflowClient.setRootURI(getConductorServerURL());
+        return workflowClient;
+    }
+
+    @NotNull
+    private static StartWorkflowRequest getStartWorkflowRequest() {
         StartWorkflowRequest startWorkflowRequest = new StartWorkflowRequest();
         startWorkflowRequest.setName("CarOrderWorkflow");
+        startWorkflowRequest.setInput(new HashMap<>());
+        return startWorkflowRequest;
+    }
 
-
-
-
+    private void initialiseWorkflow() throws IOException {
         MetadataClient metadataClient = new MetadataClient();
         metadataClient.setRootURI(getConductorServerURL());
         metadataClient.registerWorkflowDef(getWorkflowDef());
-
-        new Thread(() -> Launcher.main(new String[]{conductorServerURL})).start();
-
-        WorkflowClient workflowClient = new WorkflowClient();
-        workflowClient.setRootURI(getConductorServerURL());
-        workflowClient.startWorkflow(startWorkflowRequest);
-        Thread.sleep(1000000);
-
     }
 
     @NotNull
