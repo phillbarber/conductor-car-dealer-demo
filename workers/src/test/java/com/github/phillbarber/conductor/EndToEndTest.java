@@ -8,6 +8,7 @@ import com.netflix.conductor.common.run.Workflow;
 import org.jetbrains.annotations.NotNull;
 import org.junit.AfterClass;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
@@ -49,29 +50,24 @@ public class EndToEndTest {
 
     private Launcher launcher;
 
-    @Test
-    public void happyPathOrder() throws InterruptedException, IOException {
+    @BeforeEach
+    public void checkAllRunning() {
+
         assertTrue(redis.isRunning());
         assertTrue(conductorServer.isRunning());
         assertTrue(elastic.isRunning());
         assertTrue(conductorUI.isRunning());
+    }
 
-
-        initialiseWorkflow();
-
+    @BeforeEach
+    public void start(){
         this.launcher = startWorkers(getConductorServerURL());
-
+    }
+    @Test
+    public void happyPathOrder() throws IOException {
+        initialiseWorkflow();
         String workflowId = startWorkflow(getHappyPathInput());
-
-
-        await()
-                .atLeast(Duration.of(1, ChronoUnit.SECONDS))
-                .atMost(Duration.of(1, ChronoUnit.MINUTES))
-                .with()
-                .pollInterval(Duration.of(1, ChronoUnit.SECONDS))
-                .until(() -> getWorkflowClient().getWorkflow(workflowId, true).getStatus()== Workflow.WorkflowStatus.COMPLETED);
-
-
+        waitForWorkflowToFinish(workflowId);
         assertNotNull(getWorkflowClient().getWorkflow(workflowId, true).getOutput().get("orderId"));
 
     }
@@ -79,6 +75,15 @@ public class EndToEndTest {
     @AfterEach
     public void stop(){
         launcher.shutdown();
+    }
+
+    private void waitForWorkflowToFinish(String workflowId) {
+        await()
+                .atLeast(Duration.of(1, ChronoUnit.SECONDS))
+                .atMost(Duration.of(1, ChronoUnit.MINUTES))
+                .with()
+                .pollInterval(Duration.of(1, ChronoUnit.SECONDS))
+                .until(() -> getWorkflowClient().getWorkflow(workflowId, true).getStatus()== Workflow.WorkflowStatus.COMPLETED);
     }
 
     private static HashMap getHappyPathInput() throws IOException {
