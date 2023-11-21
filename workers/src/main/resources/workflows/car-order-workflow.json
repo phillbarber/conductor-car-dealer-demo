@@ -10,10 +10,7 @@
       "name": "CheckOrderIsValid",
       "taskReferenceName": "CheckOrderIsValidRef",
       "inputParameters": {
-        "stuff": {
-          "foo": "Foo is foo",
-          "bar": "Bar is bar"
-        }
+        "order": "${workflow.input.order}"
       },
       "type": "SIMPLE",
       "startDelay": 0,

@@ -16,9 +16,15 @@ import org.testcontainers.utility.DockerImageName;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
+import java.util.concurrent.Callable;
 
+import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
 
 
 @Testcontainers
@@ -40,7 +46,7 @@ public class EndToEndTest {
     private GenericContainer conductorUI = getConductorUIContainer();
 
     @Test
-    public void stuff() throws InterruptedException, IOException {
+    public void happyPathOrder() throws InterruptedException, IOException {
         assertTrue(redis.isRunning());
         assertTrue(conductorServer.isRunning());
         assertTrue(elastic.isRunning());
@@ -51,30 +57,45 @@ public class EndToEndTest {
 
         startWorkers(getConductorServerURL());
 
-        String workflowId = startWorkflow();
+        String workflowId = startWorkflow(getHappyPathInput());
 
-        for (int i =0 ; i<10 ; i++){
-            Workflow workflow = getWorkflowClient().getWorkflow(workflowId, true);
-            if (workflow.getStatus() == Workflow.WorkflowStatus.COMPLETED){
-                Object orderId = workflow.getOutput().get("orderId");
-                System.out.println("The order id is " + orderId);
-            }
-            System.out.println("Trying " + i);
-            System.out.println(workflow);
-            Thread.sleep(1000);
-        }
 
-        Thread.sleep(1000000);
+        await()
+                .atLeast(Duration.of(1, ChronoUnit.SECONDS))
+                .atMost(Duration.of(1, ChronoUnit.MINUTES))
+                .with()
+                .pollInterval(Duration.of(1, ChronoUnit.SECONDS))
+                .until(() -> getWorkflowClient().getWorkflow(workflowId, true).getStatus()== Workflow.WorkflowStatus.COMPLETED);
 
+
+        assertNotNull(getWorkflowClient().getWorkflow(workflowId, true).getOutput().get("orderId"));
+
+    }
+
+    private static HashMap getHappyPathInput() throws IOException {
+        return new ObjectMapper().readValue("""
+                {
+                  "order" : {
+                    "car" : {
+                      "make": "Blista",
+                      "model": "Compact",
+                      "extras" : null
+                    },
+                    "customer" :{
+                      "id" : "12345"
+                    }
+                  }
+                }
+                """, HashMap.class);
     }
 
     private void startWorkers(String conductorServerURL) {
         new Thread(() -> Launcher.main(new String[]{conductorServerURL})).start();
     }
 
-    private String startWorkflow() {
+    private String startWorkflow(HashMap input) {
         WorkflowClient workflowClient = getWorkflowClient();
-        return workflowClient.startWorkflow(getStartWorkflowRequest());
+        return workflowClient.startWorkflow(getStartWorkflowRequest(input));
     }
 
     @NotNull
@@ -85,10 +106,10 @@ public class EndToEndTest {
     }
 
     @NotNull
-    private static StartWorkflowRequest getStartWorkflowRequest() {
+    private static StartWorkflowRequest getStartWorkflowRequest(HashMap input) {
         StartWorkflowRequest startWorkflowRequest = new StartWorkflowRequest();
         startWorkflowRequest.setName("CarOrderWorkflow");
-        startWorkflowRequest.setInput(new HashMap<>());
+        startWorkflowRequest.setInput(input);
         return startWorkflowRequest;
     }
 
