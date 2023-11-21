@@ -7,6 +7,7 @@ import com.netflix.conductor.common.metadata.workflow.WorkflowDef;
 import com.netflix.conductor.common.run.Workflow;
 import org.jetbrains.annotations.NotNull;
 import org.junit.AfterClass;
+import org.junit.Ignore;
 import org.junit.jupiter.api.*;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
@@ -23,9 +24,7 @@ import java.util.HashMap;
 import java.util.concurrent.Callable;
 
 import static org.awaitility.Awaitility.await;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
+import static org.junit.jupiter.api.Assertions.*;
 
 
 @Testcontainers
@@ -69,10 +68,12 @@ public class EndToEndTest {
     }
 
     @Test
-    public void anotherHappyPathOrder() throws IOException {
+    @Ignore
+    public void unHappyPathOrder() throws IOException {
         String workflowId = startWorkflow(getHappyPathInput());
         waitForWorkflowToFinish(workflowId);
-        assertNotNull(getWorkflowClient().getWorkflow(workflowId, true).getOutput().get("orderId"));
+        assertNull(getWorkflowClient().getWorkflow(workflowId, true).getOutput().get("orderId"));
+        assertNotNull(getWorkflowClient().getWorkflow(workflowId, true).getOutput().get("rejection"));
     }
 
     @AfterAll
@@ -96,6 +97,23 @@ public class EndToEndTest {
                     "car" : {
                       "make": "Blista",
                       "model": "Compact",
+                      "extras" : null
+                    },
+                    "customer" :{
+                      "id" : "12345"
+                    }
+                  }
+                }
+                """, HashMap.class);
+    }
+
+    private static HashMap getUnHappyPathInput() throws IOException {
+        return new ObjectMapper().readValue("""
+                {
+                  "order" : {
+                    "car" : {
+                      "make": "Sentinel",
+                      "model": "XS",
                       "extras" : null
                     },
                     "customer" :{
