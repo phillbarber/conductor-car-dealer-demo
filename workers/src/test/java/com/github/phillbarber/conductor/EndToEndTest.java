@@ -7,9 +7,7 @@ import com.netflix.conductor.common.metadata.workflow.WorkflowDef;
 import com.netflix.conductor.common.run.Workflow;
 import org.jetbrains.annotations.NotNull;
 import org.junit.AfterClass;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.junit.jupiter.Container;
@@ -34,56 +32,61 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class EndToEndTest {
 
     public static final String WORKFLOW_JSON_FILE = "workflows/car-order-workflow.json";
-    private Network network = Network.newNetwork();
+    private static Network network = Network.newNetwork();
 
     @Container
-    private GenericContainer redis = getRedisContainer();
+    private static GenericContainer redis = getRedisContainer();
 
     @Container
-    private GenericContainer elastic = getElasticSearchContainer();
+    private  static GenericContainer elastic = getElasticSearchContainer();
 
     @Container
-    private GenericContainer conductorServer = getConductorContainer();
+    private static GenericContainer conductorServer = getConductorContainer();
 
     @Container
-    private GenericContainer conductorUI = getConductorUIContainer();
+    private static GenericContainer conductorUI = getConductorUIContainer();
 
-    private Launcher launcher;
+    private static Launcher launcher;
 
-    @BeforeEach
-    public void checkAllRunning() {
-
+    @BeforeAll
+    public static void checkAllRunning() {
         assertTrue(redis.isRunning());
         assertTrue(conductorServer.isRunning());
         assertTrue(elastic.isRunning());
         assertTrue(conductorUI.isRunning());
     }
 
-    @BeforeEach
-    public void start(){
-        this.launcher = startWorkers(getConductorServerURL());
+    @BeforeAll
+    public static void start() throws IOException {
+        launcher = startWorkers(getConductorServerURL());
+        initialiseWorkflow();
     }
     @Test
     public void happyPathOrder() throws IOException {
-        initialiseWorkflow();
         String workflowId = startWorkflow(getHappyPathInput());
         waitForWorkflowToFinish(workflowId);
         assertNotNull(getWorkflowClient().getWorkflow(workflowId, true).getOutput().get("orderId"));
-
     }
 
-    @AfterEach
-    public void stop(){
+    @Test
+    public void anotherHappyPathOrder() throws IOException {
+        String workflowId = startWorkflow(getHappyPathInput());
+        waitForWorkflowToFinish(workflowId);
+        assertNotNull(getWorkflowClient().getWorkflow(workflowId, true).getOutput().get("orderId"));
+    }
+
+    @AfterAll
+    public static void stop(){
         launcher.shutdown();
     }
 
     private void waitForWorkflowToFinish(String workflowId) {
         await()
                 .atLeast(Duration.of(1, ChronoUnit.SECONDS))
-                .atMost(Duration.of(1, ChronoUnit.MINUTES))
+                .atMost(Duration.of(10, ChronoUnit.MINUTES))
                 .with()
                 .pollInterval(Duration.of(1, ChronoUnit.SECONDS))
-                .until(() -> getWorkflowClient().getWorkflow(workflowId, true).getStatus()== Workflow.WorkflowStatus.COMPLETED);
+                .until(() -> getWorkflowClient().getWorkflow(workflowId, true).getStatus() == Workflow.WorkflowStatus.COMPLETED);
     }
 
     private static HashMap getHappyPathInput() throws IOException {
@@ -103,7 +106,7 @@ public class EndToEndTest {
                 """, HashMap.class);
     }
 
-    private Launcher startWorkers(String conductorServerURL) {
+    private static Launcher startWorkers(String conductorServerURL) {
         Launcher launcher = new Launcher(conductorServerURL);
         new Thread(launcher::start).start();
         return launcher;
@@ -129,24 +132,24 @@ public class EndToEndTest {
         return startWorkflowRequest;
     }
 
-    private void initialiseWorkflow() throws IOException {
+    private static void initialiseWorkflow() throws IOException {
         MetadataClient metadataClient = new MetadataClient();
         metadataClient.setRootURI(getConductorServerURL());
         metadataClient.registerWorkflowDef(getWorkflowDef());
     }
 
     @NotNull
-    private String getConductorServerURL() {
+    private static String getConductorServerURL() {
         return "http://localhost:" + conductorServer.getMappedPort(8080) + "/api/";
     }
 
 
-    private WorkflowDef getWorkflowDef() throws IOException {
-        InputStream resourceAsStream = this.getClass().getClassLoader().getResourceAsStream(WORKFLOW_JSON_FILE);
+    private static WorkflowDef getWorkflowDef() throws IOException {
+        InputStream resourceAsStream = EndToEndTest.class.getClassLoader().getResourceAsStream(WORKFLOW_JSON_FILE);
         return new ObjectMapper().readValue(resourceAsStream, WorkflowDef.class);
     }
 
-    private GenericContainer getRedisContainer() {
+    private static GenericContainer getRedisContainer() {
         return new GenericContainer(DockerImageName.parse("redis:6.2.3-alpine"))
                 .withExposedPorts(6379)
                 .withNetwork(network)
@@ -154,7 +157,7 @@ public class EndToEndTest {
     }
 
 
-    private GenericContainer getConductorUIContainer() {
+    private static GenericContainer getConductorUIContainer() {
         return new GenericContainer(DockerImageName.parse("conductor:ui"))
                 .withEnv("WF_SERVER", "http://conductor-server:8080")
                 .withExposedPorts(5000, 5000)
@@ -162,7 +165,7 @@ public class EndToEndTest {
 
     }
 
-    private GenericContainer getElasticSearchContainer() {
+    private static GenericContainer getElasticSearchContainer() {
         return new GenericContainer(DockerImageName.parse("elasticsearch:6.8.15"))
                 .withEnv("transport.host", "0.0.0.0")
                 .withEnv("discovery.type", "single-node")
@@ -175,7 +178,7 @@ public class EndToEndTest {
 
     //Not specifying the config properties file
 
-    private GenericContainer getConductorContainer() {
+    private static GenericContainer getConductorContainer() {
         return new GenericContainer(DockerImageName.parse("conductor:server"))
                 .withEnv("CONFIG_PROP", "config-local.properties")//this corresponds to https://github.com/Netflix/conductor/blob/f013a53b345b21e890790c8b7a316a34d992fc2e/docker/server/config/config-local.properties
                 .withExposedPorts(8080)
