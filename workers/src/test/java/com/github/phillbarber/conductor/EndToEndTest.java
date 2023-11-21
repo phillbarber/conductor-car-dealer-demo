@@ -6,6 +6,8 @@ import com.netflix.conductor.common.metadata.workflow.StartWorkflowRequest;
 import com.netflix.conductor.common.metadata.workflow.WorkflowDef;
 import com.netflix.conductor.common.run.Workflow;
 import org.jetbrains.annotations.NotNull;
+import org.junit.AfterClass;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
@@ -45,6 +47,8 @@ public class EndToEndTest {
     @Container
     private GenericContainer conductorUI = getConductorUIContainer();
 
+    private Launcher launcher;
+
     @Test
     public void happyPathOrder() throws InterruptedException, IOException {
         assertTrue(redis.isRunning());
@@ -55,7 +59,7 @@ public class EndToEndTest {
 
         initialiseWorkflow();
 
-        startWorkers(getConductorServerURL());
+        this.launcher = startWorkers(getConductorServerURL());
 
         String workflowId = startWorkflow(getHappyPathInput());
 
@@ -70,6 +74,11 @@ public class EndToEndTest {
 
         assertNotNull(getWorkflowClient().getWorkflow(workflowId, true).getOutput().get("orderId"));
 
+    }
+
+    @AfterEach
+    public void stop(){
+        launcher.shutdown();
     }
 
     private static HashMap getHappyPathInput() throws IOException {
@@ -89,8 +98,10 @@ public class EndToEndTest {
                 """, HashMap.class);
     }
 
-    private void startWorkers(String conductorServerURL) {
-        new Thread(() -> Launcher.main(new String[]{conductorServerURL})).start();
+    private Launcher startWorkers(String conductorServerURL) {
+        Launcher launcher = new Launcher(conductorServerURL);
+        new Thread(launcher::start).start();
+        return launcher;
     }
 
     private String startWorkflow(HashMap input) {
