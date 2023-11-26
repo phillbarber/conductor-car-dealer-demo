@@ -13,13 +13,14 @@ dependencies {
 
     implementation 'com.netflix.conductor:conductor-client:3.13.8'
     implementation 'com.netflix.conductor:conductor-common:3.13.8'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.16.0-rc1'
     implementation project(':facade')
 
     testImplementation platform('org.junit:junit-bom:5.9.1')
     testImplementation 'org.junit.jupiter:junit-jupiter:5.9.1'
     testImplementation 'org.testcontainers:testcontainers:1.19.1'
     testImplementation 'org.testcontainers:junit-jupiter:1.19.1'
-    testImplementation 'com.fasterxml.jackson.core:jackson-core:2.16.0-rc1'
+
     testImplementation 'org.awaitility:awaitility:4.2.0'
 
 }

@@ -61,7 +61,7 @@ public class EndToEndTest {
         initialiseWorkflow();
     }
     @Test
-    public void happyPathOrder() throws IOException {
+    public void happyPathOrder() throws IOException, InterruptedException {
         String workflowId = startWorkflow(getHappyPathInput());
         waitForWorkflowToFinish(workflowId);
         assertNotNull(getWorkflowClient().getWorkflow(workflowId, true).getOutput().get("orderId"));
@@ -70,7 +70,7 @@ public class EndToEndTest {
     @Test
     @Ignore
     public void unHappyPathOrder() throws IOException {
-        String workflowId = startWorkflow(getHappyPathInput());
+        String workflowId = startWorkflow(getUnHappyPathInput());
         waitForWorkflowToFinish(workflowId);
         assertNull(getWorkflowClient().getWorkflow(workflowId, true).getOutput().get("orderId"));
         assertNotNull(getWorkflowClient().getWorkflow(workflowId, true).getOutput().get("rejection"));
@@ -96,8 +96,7 @@ public class EndToEndTest {
                   "order" : {
                     "car" : {
                       "make": "Blista",
-                      "model": "Compact",
-                      "extras" : null
+                      "model": "Compact"
                     },
                     "customer" :{
                       "id" : "12345"
@@ -113,8 +112,7 @@ public class EndToEndTest {
                   "order" : {
                     "car" : {
                       "make": "Sentinel",
-                      "model": "XS",
-                      "extras" : null
+                      "model": "XS"
                     },
                     "customer" :{
                       "id" : "12345"

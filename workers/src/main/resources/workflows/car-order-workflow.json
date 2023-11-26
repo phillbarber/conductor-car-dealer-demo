@@ -1,6 +1,6 @@
 {
-  "createTime": 1689660854848,
-  "updateTime": 1689594901965,
+  "createTime": 1701034530965,
+  "updateTime": 1701034780365,
   "accessPolicy": {},
   "name": "CarOrderWorkflow",
   "description": "Car Order Workflow",
@@ -18,20 +18,36 @@
       "asyncComplete": false
     },
     {
-      "name": "SaveOrder",
-      "taskReferenceName": "SaveOrderRef",
+      "name": "Is_Order_Valid",
+      "taskReferenceName": "switch_task",
       "inputParameters": {
-
+        "switchCaseValue": "${CheckOrderIsValidRef.output.orderValid}"
       },
-      "type": "SIMPLE",
+      "type": "SWITCH",
+      "decisionCases": {
+        "true": [
+          {
+            "name": "SaveOrder",
+            "taskReferenceName": "SaveOrderRef",
+            "inputParameters": {},
+            "type": "SIMPLE",
+            "startDelay": 0,
+            "optional": false,
+            "asyncComplete": false
+          }
+        ]
+      },
       "startDelay": 0,
       "optional": false,
-      "asyncComplete": false
+      "asyncComplete": false,
+      "evaluatorType": "value-param",
+      "expression": "switchCaseValue"
     }
   ],
   "inputParameters": [],
   "outputParameters": {
-    "orderId": "${SaveOrderRef.output.orderId}"
+    "orderId": "${SaveOrderRef.output.orderId}",
+    "rejection": "${CheckOrderIsValidRef.output.rejection}"
   },
   "schemaVersion": 2,
   "restartable": true,
