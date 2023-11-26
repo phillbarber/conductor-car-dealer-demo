@@ -14,6 +14,8 @@ dependencies {
     implementation 'com.netflix.conductor:conductor-client:3.13.8'
     implementation 'com.netflix.conductor:conductor-common:3.13.8'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.16.0-rc1'
+    implementation 'org.apache.httpcomponents.client5:httpclient5:5.2.2'
+
     implementation project(':facade')
 
     testImplementation platform('org.junit:junit-bom:5.9.1')
@@ -22,6 +24,8 @@ dependencies {
     testImplementation 'org.testcontainers:junit-jupiter:1.19.1'
 
     testImplementation 'org.awaitility:awaitility:4.2.0'
+    testImplementation 'com.github.tomakehurst:wiremock:3.0.1'
+
 
 }
 

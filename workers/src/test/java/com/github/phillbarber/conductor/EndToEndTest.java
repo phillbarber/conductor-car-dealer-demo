@@ -1,5 +1,7 @@
 package com.github.phillbarber.conductor;
 
+import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo;
+import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import com.netflix.conductor.client.http.MetadataClient;
 import com.netflix.conductor.client.http.WorkflowClient;
 import com.netflix.conductor.common.metadata.workflow.StartWorkflowRequest;
@@ -23,11 +25,13 @@ import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.concurrent.Callable;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.*;
 
 
 @Testcontainers
+@WireMockTest
 public class EndToEndTest {
 
     public static final String WORKFLOW_JSON_FILE = "workflows/car-order-workflow.json";
@@ -60,6 +64,15 @@ public class EndToEndTest {
         launcher = startWorkers(getConductorServerURL());
         initialiseWorkflow();
     }
+
+    @BeforeAll
+    public static void prepareStubs(WireMockRuntimeInfo wmRuntimeInfo) {
+
+        stubFor(post("/order-service/api/v1/checkOrder").withRequestBody(matchingJsonPath("$.order.car[?(@.make=='Blista')]")).willReturn(ok()));
+        stubFor(post("/order-service/api/v1/checkOrder").withRequestBody(matchingJsonPath("$.order.car[?(@.make=='Sentinel')]")).willReturn(notFound()));
+        System.out.println();
+    }
+
     @Test
     public void happyPathOrder() throws IOException, InterruptedException {
         String workflowId = startWorkflow(getHappyPathInput());

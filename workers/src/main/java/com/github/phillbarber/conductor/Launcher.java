@@ -1,5 +1,6 @@
 package com.github.phillbarber.conductor;
 
+import com.github.phillbarber.conductor.remoteservices.OrderRemoteService;
 import com.github.phillbarber.conductor.workers.*;
 import com.netflix.conductor.client.automator.TaskRunnerConfigurer;
 import com.netflix.conductor.client.http.MetadataClient;
@@ -8,6 +9,9 @@ import com.netflix.conductor.client.http.WorkflowClient;
 import com.netflix.conductor.client.worker.Worker;
 import com.netflix.conductor.common.metadata.workflow.StartWorkflowRequest;
 import com.netflix.conductor.common.metadata.workflow.WorkflowDef;
+import org.apache.hc.client5.http.classic.HttpClient;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 
 import java.util.Arrays;
 import java.util.List;
@@ -20,11 +24,12 @@ public class Launcher {
     private final List<Worker> workers;
     private final TaskRunnerConfigurer taskRunnerConfigurer;
 
-    public Launcher(String rootURI) {
-        this.rootURI = rootURI;
-        this.taskClient = createClient(rootURI);
+    public Launcher(String conductorRootURI) {
+        this.rootURI = conductorRootURI;
+        this.taskClient = createClient(conductorRootURI);
         this.workers = getWorkers();
         this.taskRunnerConfigurer = startTaskRunner(taskClient, workers);
+
 
     }
     public void start(){
@@ -99,6 +104,12 @@ public class Launcher {
                 new SaveOrderWorker());
         return workers;
     }
+
+    private OrderRemoteService getOrderServiceCLient(String uri){
+        return new OrderRemoteService(HttpClientBuilder.create().build(), uri);
+    }
+
+
 
     private TaskClient createClient(String rootURI) {
         TaskClient taskClient = new TaskClient();
