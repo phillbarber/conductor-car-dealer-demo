@@ -60,8 +60,8 @@ public class EndToEndTest {
     }
 
     @BeforeAll
-    public static void start() throws IOException {
-        launcher = startWorkers(getConductorServerURL());
+    public static void start(WireMockRuntimeInfo wmRuntimeInfo) throws IOException {
+        launcher = startWorkers(getConductorServerURL(), wmRuntimeInfo.getHttpBaseUrl());
         initialiseWorkflow();
     }
 
@@ -135,8 +135,8 @@ public class EndToEndTest {
                 """, HashMap.class);
     }
 
-    private static Launcher startWorkers(String conductorServerURL) {
-        Launcher launcher = new Launcher(conductorServerURL);
+    private static Launcher startWorkers(String conductorServerURL, String validServiceURI) {
+        Launcher launcher = new Launcher(conductorServerURL, validServiceURI);
         new Thread(launcher::start).start();
         return launcher;
     }

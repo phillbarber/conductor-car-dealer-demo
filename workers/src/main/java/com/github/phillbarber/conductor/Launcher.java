@@ -18,15 +18,14 @@ import java.util.List;
 
 public class Launcher {
 
-
-    private final String rootURI;
     private final TaskClient taskClient;
+    private final String orderServiceRootURI;
     private final List<Worker> workers;
     private final TaskRunnerConfigurer taskRunnerConfigurer;
 
-    public Launcher(String conductorRootURI) {
-        this.rootURI = conductorRootURI;
+    public Launcher(String conductorRootURI, String orderServiceRootURI) {
         this.taskClient = createClient(conductorRootURI);
+        this.orderServiceRootURI = orderServiceRootURI;
         this.workers = getWorkers();
         this.taskRunnerConfigurer = startTaskRunner(taskClient, workers);
 
@@ -96,7 +95,7 @@ public class Launcher {
 
     private List<Worker> getWorkers() {
         List<Worker> workers = Arrays.asList(
-                new CheckOrderIsValidWorker(),
+                new CheckOrderIsValidWorker(getOrderServiceCLient(orderServiceRootURI)),
                 new GetBasePriceWorker(),
                 new GetCustomerDetailsWorker(),
                 new GetDiscountWorker(),
