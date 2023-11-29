@@ -61,15 +61,27 @@ public class EndToEndTest {
 
     @BeforeAll
     public static void start(WireMockRuntimeInfo wmRuntimeInfo) throws IOException {
-        launcher = startWorkers(getConductorServerURL(), wmRuntimeInfo.getHttpBaseUrl());
+        launcher = startWorkers(getConductorServerURL(), wmRuntimeInfo.getHttpBaseUrl() + "/order-service" );
         initialiseWorkflow();
     }
 
-    @BeforeAll
-    public static void prepareStubs(WireMockRuntimeInfo wmRuntimeInfo) {
+    @BeforeEach
+    public void prepareStubs(WireMockRuntimeInfo wmRuntimeInfo) {
 
-        stubFor(post("/order-service/api/v1/checkOrder").withRequestBody(matchingJsonPath("$.order.car[?(@.make=='Blista')]")).willReturn(ok()));
-        stubFor(post("/order-service/api/v1/checkOrder").withRequestBody(matchingJsonPath("$.order.car[?(@.make=='Sentinel')]")).willReturn(notFound()));
+        stubFor(post("/order-service/api/v1/checkOrder").withRequestBody(containing("Blista")).willReturn(ok().withBody("""
+                {
+                     "rejectionMessage" : null,
+                     "isValid": true
+                 }
+                """)));
+
+        stubFor(post("/order-service/api/v1/checkOrder").withRequestBody(containing("Sentinel")).willReturn(ok().withBody("""
+                {
+                     "rejectionMessage" : "Sorry we don't sell Sentinels",
+                     "isValid": false
+                 }
+                """)));
+
         System.out.println();
     }
 
