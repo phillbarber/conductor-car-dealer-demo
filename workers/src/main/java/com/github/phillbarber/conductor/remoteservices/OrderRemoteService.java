@@ -28,7 +28,7 @@ public class OrderRemoteService {
         try {
             httpPost.setEntity(new StringEntity(new ObjectMapper().writer().writeValueAsString(order)));
             String execute = httpClient.execute(httpPost, new BasicHttpClientResponseHandler());
-            return new ObjectMapper().reader().readValue(execute);
+            return new ObjectMapper().reader().readValue(execute, OrderValidationResponse.class);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
