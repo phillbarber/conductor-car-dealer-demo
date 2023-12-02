@@ -1,6 +1,6 @@
 package com.github.phillbarber.conductor;
 
-import com.github.phillbarber.conductor.stubs.OrderServiceStub;
+import com.github.phillbarber.conductor.stubs.StubServices;
 import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import com.netflix.conductor.client.http.MetadataClient;
@@ -9,7 +9,6 @@ import com.netflix.conductor.common.metadata.workflow.StartWorkflowRequest;
 import com.netflix.conductor.common.metadata.workflow.WorkflowDef;
 import com.netflix.conductor.common.run.Workflow;
 import org.jetbrains.annotations.NotNull;
-import org.junit.AfterClass;
 import org.junit.Ignore;
 import org.junit.jupiter.api.*;
 import org.testcontainers.containers.GenericContainer;
@@ -24,9 +23,7 @@ import java.io.InputStream;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
-import java.util.concurrent.Callable;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -51,6 +48,7 @@ public class EndToEndTest {
     private static GenericContainer conductorUI = getConductorUIContainer();
 
     private static Launcher launcher;
+    private StubServices orderServiceStub = new StubServices();;
 
     @BeforeAll
     public static void checkAllRunning() {
@@ -68,7 +66,7 @@ public class EndToEndTest {
 
     @Test
     public void happyPathOrder() throws IOException, InterruptedException {
-        new OrderServiceStub().prepareValidOrder("Blista");
+        orderServiceStub.orderServiceReturnsValidOrderFor("Blista");
         String workflowId = startWorkflow(getHappyPathInput());
         waitForWorkflowToFinish(workflowId);
         assertNotNull(getWorkflowClient().getWorkflow(workflowId, true).getOutput().get("orderId"));
@@ -77,7 +75,7 @@ public class EndToEndTest {
     @Test
     @Ignore
     public void unHappyPathOrder() throws IOException, InterruptedException {
-        new OrderServiceStub().prepareInvalidOrder("Sentinel");
+        orderServiceStub.orderServiceReturnsInvalidOrderFor("Sentinel");
         String workflowId = startWorkflow(getUnHappyPathInput());
         waitForWorkflowToFinish(workflowId);
         assertNull(getWorkflowClient().getWorkflow(workflowId, true).getOutput().get("orderId"));
@@ -120,7 +118,7 @@ public class EndToEndTest {
                   "order" : {
                     "car" : {
                       "make": "Sentinel",
-                      "model": "XS"
+                      "model": "someModel"
                     },
                     "customer" :{
                       "id" : "12345"
