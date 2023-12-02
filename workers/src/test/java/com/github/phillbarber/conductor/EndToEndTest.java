@@ -1,5 +1,6 @@
 package com.github.phillbarber.conductor;
 
+import com.github.phillbarber.conductor.stubs.OrderServiceStub;
 import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import com.netflix.conductor.client.http.MetadataClient;
@@ -65,28 +66,9 @@ public class EndToEndTest {
         initialiseWorkflow();
     }
 
-    @BeforeEach
-    public void prepareStubs(WireMockRuntimeInfo wmRuntimeInfo) {
-
-        stubFor(post("/order-service/api/v1/checkOrder").withRequestBody(containing("Blista")).willReturn(ok().withBody("""
-                {
-                     "rejectionMessage" : null,
-                     "isValid": true
-                 }
-                """)));
-
-        stubFor(post("/order-service/api/v1/checkOrder").withRequestBody(containing("Sentinel")).willReturn(ok().withBody("""
-                {
-                     "rejectionMessage" : "Sorry we don't sell Sentinels",
-                     "isValid": false
-                 }
-                """)));
-
-        System.out.println();
-    }
-
     @Test
     public void happyPathOrder() throws IOException, InterruptedException {
+        new OrderServiceStub().prepareValidOrder("Blista");
         String workflowId = startWorkflow(getHappyPathInput());
         waitForWorkflowToFinish(workflowId);
         assertNotNull(getWorkflowClient().getWorkflow(workflowId, true).getOutput().get("orderId"));
@@ -94,7 +76,8 @@ public class EndToEndTest {
 
     @Test
     @Ignore
-    public void unHappyPathOrder() throws IOException {
+    public void unHappyPathOrder() throws IOException, InterruptedException {
+        new OrderServiceStub().prepareInvalidOrder("Sentinel");
         String workflowId = startWorkflow(getUnHappyPathInput());
         waitForWorkflowToFinish(workflowId);
         assertNull(getWorkflowClient().getWorkflow(workflowId, true).getOutput().get("orderId"));

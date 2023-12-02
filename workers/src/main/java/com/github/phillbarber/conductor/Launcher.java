@@ -1,15 +1,11 @@
 package com.github.phillbarber.conductor;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.phillbarber.conductor.remoteservices.OrderRemoteService;
 import com.github.phillbarber.conductor.workers.*;
 import com.netflix.conductor.client.automator.TaskRunnerConfigurer;
-import com.netflix.conductor.client.http.MetadataClient;
 import com.netflix.conductor.client.http.TaskClient;
-import com.netflix.conductor.client.http.WorkflowClient;
 import com.netflix.conductor.client.worker.Worker;
-import com.netflix.conductor.common.metadata.workflow.StartWorkflowRequest;
-import com.netflix.conductor.common.metadata.workflow.WorkflowDef;
-import org.apache.hc.client5.http.classic.HttpClient;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 
@@ -94,20 +90,15 @@ public class Launcher {
 
 
     private List<Worker> getWorkers() {
-        List<Worker> workers = Arrays.asList(
-                new CheckOrderIsValidWorker(getOrderServiceCLient(orderServiceRootURI)),
+        CloseableHttpClient httpClient = HttpClientBuilder.create().build();
+        return Arrays.asList(
+                new CheckOrderIsValidWorker(new OrderRemoteService(httpClient, orderServiceRootURI, new ObjectMapper())),
                 new GetBasePriceWorker(),
                 new GetCustomerDetailsWorker(),
                 new GetDiscountWorker(),
                 new GetPriceForExtrasWorker(),
                 new SaveOrderWorker());
-        return workers;
     }
-
-    private OrderRemoteService getOrderServiceCLient(String uri){
-        return new OrderRemoteService(HttpClientBuilder.create().build(), uri);
-    }
-
 
 
     private TaskClient createClient(String rootURI) {
