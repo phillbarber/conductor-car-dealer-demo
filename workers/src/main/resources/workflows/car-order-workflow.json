@@ -29,7 +29,9 @@
           {
             "name": "GetCustomerDetails",
             "taskReferenceName": "GetCustomerDetailsRef",
-            "inputParameters": {},
+            "inputParameters": {
+              "order": "${workflow.input.order}"
+            },
             "type": "SIMPLE",
             "startDelay": 0,
             "optional": false,
@@ -38,7 +40,9 @@
           {
             "name": "GetBasePrice",
             "taskReferenceName": "GetBasePriceRef",
-            "inputParameters": {},
+            "inputParameters": {
+              "order": "${workflow.input.order}"
+            },
             "type": "SIMPLE",
             "startDelay": 0,
             "optional": false,
@@ -47,7 +51,9 @@
           {
             "name": "GetDiscount",
             "taskReferenceName": "GetDiscountRef",
-            "inputParameters": {},
+            "inputParameters": {
+              "order": "${workflow.input.order}"
+            },
             "type": "SIMPLE",
             "startDelay": 0,
             "optional": false,
@@ -56,7 +62,9 @@
           {
             "name": "SaveOrder",
             "taskReferenceName": "SaveOrderRef",
-            "inputParameters": {},
+            "inputParameters": {
+              "order": "${workflow.input.order}"
+            },
             "type": "SIMPLE",
             "startDelay": 0,
             "optional": false,
