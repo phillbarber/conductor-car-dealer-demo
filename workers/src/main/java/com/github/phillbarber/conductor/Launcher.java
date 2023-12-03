@@ -1,6 +1,7 @@
 package com.github.phillbarber.conductor;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.phillbarber.conductor.remoteservices.BasePriceRemoteService;
 import com.github.phillbarber.conductor.remoteservices.OrderRemoteService;
 import com.github.phillbarber.conductor.workers.*;
 import com.netflix.conductor.client.automator.TaskRunnerConfigurer;
@@ -15,13 +16,14 @@ import java.util.List;
 public class Launcher {
 
     private final TaskClient taskClient;
-    private final String orderServiceRootURI;
     private final List<Worker> workers;
     private final TaskRunnerConfigurer taskRunnerConfigurer;
 
-    public Launcher(String conductorRootURI, String orderServiceRootURI) {
+    private final String serviceRootURI;
+
+    public Launcher(String conductorRootURI, String serviceRootURI) {
         this.taskClient = createClient(conductorRootURI);
-        this.orderServiceRootURI = orderServiceRootURI;
+        this.serviceRootURI = serviceRootURI;
         this.workers = getWorkers();
         this.taskRunnerConfigurer = startTaskRunner(taskClient, workers);
 
@@ -92,8 +94,8 @@ public class Launcher {
     private List<Worker> getWorkers() {
         CloseableHttpClient httpClient = HttpClientBuilder.create().build();
         return Arrays.asList(
-                new CheckOrderIsValidWorker(new OrderRemoteService(httpClient, orderServiceRootURI, new ObjectMapper())),
-                new GetBasePriceWorker(),
+                new CheckOrderIsValidWorker(new OrderRemoteService(httpClient, serviceRootURI, new ObjectMapper())),
+                new GetBasePriceWorker(new BasePriceRemoteService(httpClient, serviceRootURI, new ObjectMapper() )),
                 new GetCustomerDetailsWorker(),
                 new GetDiscountWorker(),
                 new GetPriceForExtrasWorker(),

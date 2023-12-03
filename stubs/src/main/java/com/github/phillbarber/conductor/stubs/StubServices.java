@@ -44,7 +44,7 @@ public class StubServices {
         stubFor(post(urlPathMatching(PriceService)).willReturn(ok().withBody("""
                 {
                      "basePrice" : 60000,
-                     "currency" : "GBP",
+                     "currency" : "GBP"
                  }
                 """)));
     }
@@ -53,12 +53,12 @@ public class StubServices {
         stubFor(post(urlPathMatching(DiscountService)).willReturn(ok().withBody("""
                 {
                      "discount" : 0.1,
-                     "promotionCode" : "ABCDE1234",
+                     "promotionCode" : "ABCDE1234"
                  }
                 """)));
     }
 
-    public void saveOrder() {
+    public void saveOrderReturnsOK() {
         stubFor(post(urlPathMatching(OrderServiceSaveOrder)).willReturn(ok().withBody("""
                 {
                   "id" : "123456",

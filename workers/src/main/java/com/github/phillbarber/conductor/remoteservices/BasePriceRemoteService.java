@@ -7,23 +7,23 @@ import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.impl.classic.BasicHttpClientResponseHandler;
 import org.apache.hc.core5.http.io.entity.StringEntity;
 
-public class OrderRemoteService {
+public class BasePriceRemoteService {
     private HttpClient httpClient;
-    private String rootURI;
+    private final String serviceRootURI;
     private ObjectMapper objectMapper;
 
-    public OrderRemoteService(HttpClient httpClient, String rootURI, ObjectMapper objectMapper) {
+    public BasePriceRemoteService(HttpClient httpClient, String serviceRootURI, ObjectMapper objectMapper) {
         this.httpClient = httpClient;
-        this.rootURI = rootURI;
+        this.serviceRootURI = serviceRootURI;
         this.objectMapper = objectMapper;
     }
 
-    public OrderValidationResponse getValidationResponse(Order order) {
-        HttpPost httpPost = new HttpPost(rootURI +"/order-service/api/v1/checkOrder");
+    public BasePriceResponse getBasePrice(Order order) {
+        HttpPost httpPost = new HttpPost( serviceRootURI + "/price-service/api/v1/price/");
         try {
             httpPost.setEntity(new StringEntity(objectMapper.writer().writeValueAsString(order)));
             String execute = httpClient.execute(httpPost, new BasicHttpClientResponseHandler());
-            return objectMapper.reader().readValue(execute, OrderValidationResponse.class);
+            return objectMapper.reader().readValue(execute, BasePriceResponse.class);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

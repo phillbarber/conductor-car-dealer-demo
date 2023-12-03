@@ -48,7 +48,7 @@ public class EndToEndTest {
     private static GenericContainer conductorUI = getConductorUIContainer();
 
     private static Launcher launcher;
-    private StubServices orderServiceStub = new StubServices();;
+    private StubServices stubServices = new StubServices();;
 
     @BeforeAll
     public static void checkAllRunning() {
@@ -60,13 +60,17 @@ public class EndToEndTest {
 
     @BeforeAll
     public static void start(WireMockRuntimeInfo wmRuntimeInfo) throws IOException {
-        launcher = startWorkers(getConductorServerURL(), wmRuntimeInfo.getHttpBaseUrl() + "/order-service" );
+        launcher = startWorkers(getConductorServerURL(), wmRuntimeInfo.getHttpBaseUrl() );
         initialiseWorkflow();
     }
 
     @Test
     public void happyPathOrder() throws IOException, InterruptedException {
-        orderServiceStub.orderServiceReturnsValidOrderFor("Blista");
+        stubServices.orderServiceReturnsValidOrderFor("Blista");
+        stubServices.saveOrderReturnsOK();
+        stubServices.priceServiceReturnsPrice();
+        stubServices.customerServiceReturnsCustomerFor("12345");
+
         String workflowId = startWorkflow(getHappyPathInput());
         waitForWorkflowToFinish(workflowId);
         Workflow workflow = getWorkflowClient().getWorkflow(workflowId, true);
@@ -85,7 +89,7 @@ public class EndToEndTest {
     @Test
     @Ignore
     public void unHappyPathOrder() throws IOException, InterruptedException {
-        orderServiceStub.orderServiceReturnsInvalidOrderFor("Sentinel");
+        stubServices.orderServiceReturnsInvalidOrderFor("Sentinel");
         String workflowId = startWorkflow(getUnHappyPathInput());
         waitForWorkflowToFinish(workflowId);
         assertNull(getWorkflowClient().getWorkflow(workflowId, true).getOutput().get("orderId"));
@@ -138,8 +142,8 @@ public class EndToEndTest {
                 """, HashMap.class);
     }
 
-    private static Launcher startWorkers(String conductorServerURL, String validServiceURI) {
-        Launcher launcher = new Launcher(conductorServerURL, validServiceURI);
+    private static Launcher startWorkers(String conductorServerURL, String serviceRootURI) {
+        Launcher launcher = new Launcher(conductorServerURL, serviceRootURI);
         new Thread(launcher::start).start();
         return launcher;
     }
