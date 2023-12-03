@@ -69,7 +69,17 @@ public class EndToEndTest {
         orderServiceStub.orderServiceReturnsValidOrderFor("Blista");
         String workflowId = startWorkflow(getHappyPathInput());
         waitForWorkflowToFinish(workflowId);
-        assertNotNull(getWorkflowClient().getWorkflow(workflowId, true).getOutput().get("orderId"));
+        Workflow workflow = getWorkflowClient().getWorkflow(workflowId, true);
+        assertNotNull(workflow.getOutput().get("orderId"));
+        assertNotNull(workflow.getOutput().get("customerId"));
+        assertNotNull(workflow.getOutput().get("customerName"));
+        assertNotNull(workflow.getOutput().get("customerLoyaltyPoints"));
+        //assertNotNull(getWorkflowClient().getWorkflow(workflowId, true).getOutput().get("car"));
+        assertEquals(workflow.getOutput().get("basePrice"), 60000);
+        assertEquals(workflow.getOutput().get("totalPrice"), 54000);
+        assertEquals(workflow.getOutput().get("currency"), "GBP");
+        assertEquals(workflow.getOutput().get("promotionCode"), "ABCDE1234");
+        assertEquals(workflow.getOutput().get("discount"), 0.1);
     }
 
     @Test

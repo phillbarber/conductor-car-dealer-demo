@@ -27,6 +27,33 @@
       "decisionCases": {
         "true": [
           {
+            "name": "GetCustomerDetails",
+            "taskReferenceName": "GetCustomerDetailsRef",
+            "inputParameters": {},
+            "type": "SIMPLE",
+            "startDelay": 0,
+            "optional": false,
+            "asyncComplete": false
+          },
+          {
+            "name": "GetBasePrice",
+            "taskReferenceName": "GetBasePriceRef",
+            "inputParameters": {},
+            "type": "SIMPLE",
+            "startDelay": 0,
+            "optional": false,
+            "asyncComplete": false
+          },
+          {
+            "name": "GetDiscount",
+            "taskReferenceName": "GetDiscountRef",
+            "inputParameters": {},
+            "type": "SIMPLE",
+            "startDelay": 0,
+            "optional": false,
+            "asyncComplete": false
+          },
+          {
             "name": "SaveOrder",
             "taskReferenceName": "SaveOrderRef",
             "inputParameters": {},
@@ -47,6 +74,14 @@
   "inputParameters": [],
   "outputParameters": {
     "orderId": "${SaveOrderRef.output.orderId}",
+    "customerId": "${GetCustomerDetailsRef.output.customerId}",
+    "customerName": "${GetCustomerDetailsRef.output.customerId}",
+    "customerLoyaltyPoints": "${GetCustomerDetailsRef.output.customerId}",
+    "basePrice": "${GetBasePriceRef.output.basePrice}",
+    "currency": "${GetBasePriceRef.output.currency}",
+    "totalPrice": "${GetDiscountRef.output.totalPrice}",
+    "promotionCode": "${GetDiscountRef.output.promotionCode}",
+    "discount": "${GetDiscountRef.output.discount}",
     "rejection": "${CheckOrderIsValidRef.output.rejection}"
   },
   "schemaVersion": 2,
