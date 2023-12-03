@@ -101,7 +101,6 @@ public class Launcher {
                 new GetBasePriceWorker(new BasePriceRemoteService(httpClient, serviceRootURI, objectMapper)),
                 new GetCustomerDetailsWorker(new CustomerRemoteService(httpClient, serviceRootURI, objectMapper)),
                 new GetDiscountWorker(new DiscountPriceRemoteService(httpClient, serviceRootURI, objectMapper)),
-                new GetPriceForExtrasWorker(),
                 new SaveOrderWorker());
     }
 

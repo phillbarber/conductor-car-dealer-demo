@@ -14,12 +14,12 @@ public class OrderRemoteService {
 
     public OrderRemoteService(HttpClient httpClient, String rootURI, ObjectMapper objectMapper) {
         this.httpClient = httpClient;
-        this.rootURI = rootURI;
+        this.rootURI = rootURI + "/order-service/api/v1/";
         this.objectMapper = objectMapper;
     }
 
     public OrderValidationResponse getValidationResponse(Order order) {
-        HttpPost httpPost = new HttpPost(rootURI +"/order-service/api/v1/checkOrder");
+        HttpPost httpPost = new HttpPost(rootURI + "checkOrder");
         try {
             httpPost.setEntity(new StringEntity(objectMapper.writer().writeValueAsString(order)));
             String execute = httpClient.execute(httpPost, new BasicHttpClientResponseHandler());
