@@ -3,6 +3,7 @@ package com.github.phillbarber.conductor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.phillbarber.conductor.remoteservices.BasePriceRemoteService;
 import com.github.phillbarber.conductor.remoteservices.CustomerRemoteService;
+import com.github.phillbarber.conductor.remoteservices.DiscountPriceRemoteService;
 import com.github.phillbarber.conductor.remoteservices.OrderRemoteService;
 import com.github.phillbarber.conductor.workers.*;
 import com.netflix.conductor.client.automator.TaskRunnerConfigurer;
@@ -99,7 +100,7 @@ public class Launcher {
                 new CheckOrderIsValidWorker(new OrderRemoteService(httpClient, serviceRootURI, objectMapper)),
                 new GetBasePriceWorker(new BasePriceRemoteService(httpClient, serviceRootURI, objectMapper)),
                 new GetCustomerDetailsWorker(new CustomerRemoteService(httpClient, serviceRootURI, objectMapper)),
-                new GetDiscountWorker(),
+                new GetDiscountWorker(new DiscountPriceRemoteService(httpClient, serviceRootURI, objectMapper)),
                 new GetPriceForExtrasWorker(),
                 new SaveOrderWorker());
     }

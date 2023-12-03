@@ -53,6 +53,7 @@ public class StubServices {
         stubFor(post(urlPathMatching(DiscountService)).willReturn(ok().withBody("""
                 {
                      "discount" : 0.1,
+                     "totalPrice" : 54000,
                      "promotionCode" : "ABCDE1234"
                  }
                 """)));

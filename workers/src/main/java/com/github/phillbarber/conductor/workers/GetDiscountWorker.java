@@ -1,5 +1,9 @@
 package com.github.phillbarber.conductor.workers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.phillbarber.conductor.Order;
+import com.github.phillbarber.conductor.remoteservices.DiscountPriceRemoteService;
+import com.github.phillbarber.conductor.remoteservices.DiscountPriceResponse;
 import com.netflix.conductor.client.worker.Worker;
 import com.netflix.conductor.common.metadata.tasks.Task;
 import com.netflix.conductor.common.metadata.tasks.TaskResult;
@@ -7,6 +11,12 @@ import com.netflix.conductor.common.metadata.tasks.TaskResult;
 import static com.netflix.conductor.common.metadata.tasks.TaskResult.Status.COMPLETED;
 
 public class GetDiscountWorker implements Worker {
+
+    private DiscountPriceRemoteService discountService;
+
+    public GetDiscountWorker(DiscountPriceRemoteService discountService) {
+        this.discountService = discountService;
+    }
 
     @Override
     public String getTaskDefName() {
@@ -16,9 +26,16 @@ public class GetDiscountWorker implements Worker {
     @Override
     public TaskResult execute(Task task) {
         TaskResult result = new TaskResult(task);
-        result.getOutputData().put("discount", 0.1);
-        result.getOutputData().put("promotionCode", "ABCDE1234");
-        result.getOutputData().put("totalPrice", 54000);
+        Order order = new ObjectMapper().convertValue(task.getInputData().get("order"), Order.class);
+        Integer basePrice = new ObjectMapper().convertValue(task.getInputData().get("basePrice"), Integer.class);
+        Integer customerLoyaltyPoints = new ObjectMapper().convertValue(task.getInputData().get("customerLoyaltyPoints"), Integer.class);
+
+        DiscountPriceResponse discountPrice = discountService.getDiscountPrice(order, basePrice, customerLoyaltyPoints);
+
+
+        result.getOutputData().put("discount", discountPrice.discount());
+        result.getOutputData().put("promotionCode", discountPrice.promotionCode());
+        result.getOutputData().put("totalPrice", discountPrice.totalPrice());
         result.setStatus(COMPLETED);
         return result;
     }

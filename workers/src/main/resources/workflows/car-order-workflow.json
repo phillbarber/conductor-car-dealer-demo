@@ -52,7 +52,9 @@
             "name": "GetDiscount",
             "taskReferenceName": "GetDiscountRef",
             "inputParameters": {
-              "order": "${workflow.input.order}"
+              "order": "${workflow.input.order}",
+              "basePrice": "${GetBasePriceRef.output.basePrice}",
+              "customerLoyaltyPoints": "${GetCustomerDetailsRef.output.customerId}"
             },
             "type": "SIMPLE",
             "startDelay": 0,

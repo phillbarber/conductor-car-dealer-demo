@@ -70,6 +70,7 @@ public class EndToEndTest {
         stubServices.saveOrderReturnsOK();
         stubServices.priceServiceReturnsPrice();
         stubServices.customerServiceReturnsCustomerFor("12345");
+        stubServices.discountServiceReturns();
 
         String workflowId = startWorkflow(getHappyPathInput());
         waitForWorkflowToFinish(workflowId);
