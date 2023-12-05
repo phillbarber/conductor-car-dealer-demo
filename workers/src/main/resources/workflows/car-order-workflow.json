@@ -65,7 +65,14 @@
             "name": "SaveOrder",
             "taskReferenceName": "SaveOrderRef",
             "inputParameters": {
-              "order": "${workflow.input.order}"
+              "customerId": "${GetCustomerDetailsRef.output.customerId}",
+              "customerName": "${GetCustomerDetailsRef.output.customerId}",
+              "customerLoyaltyPoints": "${GetCustomerDetailsRef.output.customerId}",
+              "basePrice": "${GetBasePriceRef.output.basePrice}",
+              "currency": "${GetBasePriceRef.output.currency}",
+              "totalPrice": "${GetDiscountRef.output.totalPrice}",
+              "promotionCode": "${GetDiscountRef.output.promotionCode}",
+              "discount": "${GetDiscountRef.output.discount}"
             },
             "type": "SIMPLE",
             "startDelay": 0,
@@ -83,16 +90,7 @@
   ],
   "inputParameters": [],
   "outputParameters": {
-    "orderId": "${SaveOrderRef.output.orderId}",
-    "customerId": "${GetCustomerDetailsRef.output.customerId}",
-    "customerName": "${GetCustomerDetailsRef.output.customerId}",
-    "customerLoyaltyPoints": "${GetCustomerDetailsRef.output.customerId}",
-    "basePrice": "${GetBasePriceRef.output.basePrice}",
-    "currency": "${GetBasePriceRef.output.currency}",
-    "totalPrice": "${GetDiscountRef.output.totalPrice}",
-    "promotionCode": "${GetDiscountRef.output.promotionCode}",
-    "discount": "${GetDiscountRef.output.discount}",
-    "rejection": "${CheckOrderIsValidRef.output.rejection}"
+    "order": "${SaveOrderRef.output.order}"
   },
   "schemaVersion": 2,
   "restartable": true,

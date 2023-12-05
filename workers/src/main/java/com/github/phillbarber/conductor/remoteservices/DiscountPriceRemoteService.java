@@ -1,7 +1,7 @@
 package com.github.phillbarber.conductor.remoteservices;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.phillbarber.conductor.Order;
+import com.github.phillbarber.conductor.OrderRequest;
 import org.apache.hc.client5.http.classic.HttpClient;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.impl.classic.BasicHttpClientResponseHandler;
@@ -20,11 +20,11 @@ public class DiscountPriceRemoteService {
         this.objectMapper = objectMapper;
     }
 
-    public DiscountPriceResponse getDiscountPrice(Order order, Integer basePrice, Integer customerLoyaltyPoints) {
+    public DiscountPriceResponse getDiscountPrice(OrderRequest orderRequest, Integer basePrice, Integer customerLoyaltyPoints) {
         try {
 
-            HttpPost request = new HttpPost( serviceRootURI + "/discount-service/api/v1/price/");
-            request.setEntity(new StringEntity(objectMapper.writer().writeValueAsString(buildRequest(order, basePrice, customerLoyaltyPoints))));
+            HttpPost request = new HttpPost( serviceRootURI + "/discount-service/api/v1/price");
+            request.setEntity(new StringEntity(objectMapper.writer().writeValueAsString(buildRequest(orderRequest, basePrice, customerLoyaltyPoints))));
 
             String execute = httpClient.execute(request, new BasicHttpClientResponseHandler());
             return objectMapper.reader().readValue(execute, DiscountPriceResponse.class);
@@ -33,9 +33,9 @@ public class DiscountPriceRemoteService {
         }
     }
 
-    private static HashMap<Object, Object> buildRequest(Order order, Integer basePrice, Integer customerLoyaltyPoints) {
+    private static HashMap<Object, Object> buildRequest(OrderRequest orderRequest, Integer basePrice, Integer customerLoyaltyPoints) {
         HashMap<Object, Object> request = new HashMap<>();
-        request.put("order", order);
+        request.put("order", orderRequest);
         request.put("basePrice", basePrice);
         request.put("customerLoyaltyPoints", customerLoyaltyPoints);
         return request;

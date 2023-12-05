@@ -1,7 +1,7 @@
 package com.github.phillbarber.conductor.workers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.phillbarber.conductor.Order;
+import com.github.phillbarber.conductor.OrderRequest;
 import com.github.phillbarber.conductor.remoteservices.DiscountPriceRemoteService;
 import com.github.phillbarber.conductor.remoteservices.DiscountPriceResponse;
 import com.netflix.conductor.client.worker.Worker;
@@ -26,11 +26,11 @@ public class GetDiscountWorker implements Worker {
     @Override
     public TaskResult execute(Task task) {
         TaskResult result = new TaskResult(task);
-        Order order = new ObjectMapper().convertValue(task.getInputData().get("order"), Order.class);
+        OrderRequest orderRequest = new ObjectMapper().convertValue(task.getInputData().get("order"), OrderRequest.class);
         Integer basePrice = new ObjectMapper().convertValue(task.getInputData().get("basePrice"), Integer.class);
         Integer customerLoyaltyPoints = new ObjectMapper().convertValue(task.getInputData().get("customerLoyaltyPoints"), Integer.class);
 
-        DiscountPriceResponse discountPrice = discountService.getDiscountPrice(order, basePrice, customerLoyaltyPoints);
+        DiscountPriceResponse discountPrice = discountService.getDiscountPrice(orderRequest, basePrice, customerLoyaltyPoints);
 
 
         result.getOutputData().put("discount", discountPrice.discount());

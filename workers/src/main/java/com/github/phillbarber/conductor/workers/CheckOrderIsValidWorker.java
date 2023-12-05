@@ -1,13 +1,11 @@
 package com.github.phillbarber.conductor.workers;
 
-import com.github.phillbarber.conductor.Order;
+import com.github.phillbarber.conductor.OrderRequest;
 import com.github.phillbarber.conductor.remoteservices.OrderRemoteService;
 import com.github.phillbarber.conductor.remoteservices.OrderValidationResponse;
 import com.netflix.conductor.client.worker.Worker;
 import com.netflix.conductor.common.metadata.tasks.Task;
 import com.netflix.conductor.common.metadata.tasks.TaskResult;
-
-import java.util.Map;
 
 import static com.netflix.conductor.common.metadata.tasks.TaskResult.Status.COMPLETED;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -28,11 +26,11 @@ public class CheckOrderIsValidWorker implements Worker {
     @Override
     public TaskResult execute(Task task) {
 
-        Order order = new ObjectMapper().convertValue(task.getInputData().get("order"), Order.class);
+        OrderRequest orderRequest = new ObjectMapper().convertValue(task.getInputData().get("order"), OrderRequest.class);
 
         TaskResult result = new TaskResult(task);
 
-        OrderValidationResponse validationResponse = service.getValidationResponse(order);
+        OrderValidationResponse validationResponse = service.getValidationResponse(orderRequest);
 
         if (validationResponse.isValid()){
             result.getOutputData().put("orderValid", true);

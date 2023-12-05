@@ -4,10 +4,10 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*;
 public class StubServices {
 
     public static final String OrderServiceCheckOrder = "/order-service/api/v1/checkOrder";
-    public static final String CustomerServiceRoot = "/customer-service/api/v1/customer/";
-    public static final String PriceService = "/price-service/api/v1/price/";
-    public static final String DiscountService = "/discount-service/api/v1/price/";
-    public static final String OrderServiceSaveOrder = "/order-service/api/v1/order/";
+    public static final String CustomerServiceRoot = "/customer-service/api/v1/customer";
+    public static final String PriceService = "/price-service/api/v1/price";
+    public static final String DiscountService = "/discount-service/api/v1/price";
+    public static final String OrderServiceSaveOrder = "/order-service/api/v1/order";
 
     public void orderServiceReturnsInvalidOrderFor(String carMake) {
         stubFor(post(OrderServiceCheckOrder).withRequestBody(containing(carMake)).willReturn(ok().withBody("""
@@ -62,17 +62,7 @@ public class StubServices {
     public void saveOrderReturnsOK() {
         stubFor(post(urlPathMatching(OrderServiceSaveOrder)).willReturn(ok().withBody("""
                 {
-                  "id" : "123456",
-                  "customerId" : "1234",
-                  "car" : {
-                      "make": "Blista",
-                      "model": "someModel"
-                    },
-                  "basePrice" : 60000,
-                  "totalPrice" : 54000,
-                  "currency" : "GBP",
-                  "promotionCode" : "ABCDE1234",
-                  "discount" : 0.1
+                  "id" : "123456"
                  }
                 """)));
     }

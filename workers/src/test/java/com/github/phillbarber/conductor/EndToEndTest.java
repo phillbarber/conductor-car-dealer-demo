@@ -23,6 +23,7 @@ import java.io.InputStream;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
+import java.util.Map;
 
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.*;
@@ -75,16 +76,17 @@ public class EndToEndTest {
         String workflowId = startWorkflow(getHappyPathInput());
         waitForWorkflowToFinish(workflowId);
         Workflow workflow = getWorkflowClient().getWorkflow(workflowId, true);
-        assertNotNull(workflow.getOutput().get("orderId"));
-        assertNotNull(workflow.getOutput().get("customerId"));
-        assertNotNull(workflow.getOutput().get("customerName"));
-        assertNotNull(workflow.getOutput().get("customerLoyaltyPoints"));
+        Map order = (Map) workflow.getOutput().get("order");
+        assertNotNull(order.get("id"));
+        assertNotNull(order.get("customerId"));
+        assertNotNull(order.get("customerName"));
+        assertNotNull(order.get("customerLoyaltyPoints"));
         //assertNotNull(getWorkflowClient().getWorkflow(workflowId, true).getOutput().get("car"));
-        assertEquals(workflow.getOutput().get("basePrice"), 60000);
-        assertEquals(workflow.getOutput().get("totalPrice"), 54000);
-        assertEquals(workflow.getOutput().get("currency"), "GBP");
-        assertEquals(workflow.getOutput().get("promotionCode"), "ABCDE1234");
-        assertEquals(workflow.getOutput().get("discount"), 0.1);
+        assertEquals(order.get("basePrice"), 60000);
+        assertEquals(order.get("totalPrice"), 54000);
+        assertEquals(order.get("currency"), "GBP");
+        assertEquals(order.get("promotionCode"), "ABCDE1234");
+        assertEquals(order.get("discount"), 0.1);
     }
 
     @Test

@@ -1,7 +1,7 @@
 package com.github.phillbarber.conductor.workers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.phillbarber.conductor.Order;
+import com.github.phillbarber.conductor.OrderRequest;
 import com.github.phillbarber.conductor.remoteservices.CustomerRemoteService;
 import com.github.phillbarber.conductor.remoteservices.CustomerResponse;
 import com.netflix.conductor.client.worker.Worker;
@@ -25,11 +25,11 @@ public class GetCustomerDetailsWorker implements Worker {
 
     @Override
     public TaskResult execute(Task task) {
-        Order order = new ObjectMapper().convertValue(task.getInputData().get("order"), Order.class);
+        OrderRequest orderRequest = new ObjectMapper().convertValue(task.getInputData().get("order"), OrderRequest.class);
         TaskResult result = new TaskResult(task);
-        CustomerResponse customer = customerService.getCustomer(order.customer().id());
+        CustomerResponse customer = customerService.getCustomer(orderRequest.customer().id());
         result.getOutputData().put("customerName", customer.name());
-        result.getOutputData().put("customerId", order.customer().id());
+        result.getOutputData().put("customerId", orderRequest.customer().id());
         result.getOutputData().put("customerLoyaltyPoints", customer.loyaltyPoints());
         result.setStatus(COMPLETED);
         return result;
