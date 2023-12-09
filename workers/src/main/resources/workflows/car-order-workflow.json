@@ -90,7 +90,8 @@
   ],
   "inputParameters": [],
   "outputParameters": {
-    "order": "${SaveOrderRef.output.order}"
+    "order": "${SaveOrderRef.output.order}",
+    "rejection": "${CheckOrderIsValidRef.output.rejection}"
   },
   "schemaVersion": 2,
   "restartable": true,
