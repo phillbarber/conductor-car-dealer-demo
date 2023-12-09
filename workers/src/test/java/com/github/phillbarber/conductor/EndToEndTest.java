@@ -95,8 +95,9 @@ public class EndToEndTest {
         stubServices.orderServiceReturnsInvalidOrderFor("Sentinel");
         String workflowId = startWorkflow(getUnHappyPathInput());
         waitForWorkflowToFinish(workflowId);
-        assertNull(getWorkflowClient().getWorkflow(workflowId, true).getOutput().get("orderId"));
-        assertNotNull(getWorkflowClient().getWorkflow(workflowId, true).getOutput().get("rejection"));
+        Map<String, Object> workflowOutput = getWorkflowClient().getWorkflow(workflowId, true).getOutput();
+        assertNull(workflowOutput.get("orderId"));
+        assertNotNull(workflowOutput.get("rejection"));
     }
 
     @AfterAll
