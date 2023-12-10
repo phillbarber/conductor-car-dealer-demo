@@ -9,8 +9,36 @@ repositories {
     mavenCentral()
 }
 
+
+///dependencyManagement {
+//    dependencies {
+//        dependency 'org.springframework:spring-core:6.0.10'
+//compile "org.glassfish.jersey:jersey-bom:${jersey.version}" ???????
+//    }
+//}
+
 dependencies {
-    implementation 'org.takes:takes:1.11.3'
+
+
+    //this below actually works
+    //implementation 'org.eclipse.jetty:jetty-bom:11.0.15'
+    //implementation 'org.eclipse.jetty:jetty-server:11.0.15'
+
+
+    //I followed this but didn't use the jersey-bom https://mkyong.com/webservices/jax-rs/jersey-and-jetty-http-server-examples/
+    //3.1.4 of jersey works here but breaks wiremock
+    //2.22 works here but then i can't work out how to get hk2 working as it's not in the bom!
+
+    implementation "org.eclipse.jetty:jetty-server:11.0.15"
+    implementation "org.eclipse.jetty:jetty-servlet:11.0.15"
+
+    implementation 'javax.ws.rs:javax.ws.rs-api:2.1.1'
+    implementation 'org.glassfish.jersey.core:jersey-common:2.22.2'
+    implementation "org.glassfish.jersey.containers:jersey-container-jetty-http:2.22.2"
+    implementation "org.glassfish.jersey.media:jersey-media-json-jackson:2.22.2"
+    implementation "org.glassfish.jersey.inject:jersey-hk2:2.26"
+    implementation 'javax.servlet:servlet-api:2.5'
+
     testImplementation platform('org.junit:junit-bom:5.9.1')
     testImplementation 'org.junit.jupiter:junit-jupiter'
 }
