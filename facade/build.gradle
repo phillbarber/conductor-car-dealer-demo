@@ -43,7 +43,7 @@ dependencies {
 
 
 
-    //this needs tidying
+    //this needs tidying - this should move to parent build.gradle
     implementation 'org.slf4j:slf4j-api:2.0.5'
     implementation 'ch.qos.logback:logback-classic:1.4.14'
 
