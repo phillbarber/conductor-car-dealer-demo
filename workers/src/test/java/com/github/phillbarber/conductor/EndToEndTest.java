@@ -1,5 +1,7 @@
 package com.github.phillbarber.conductor;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.phillbarber.conductor.remoteservices.OrderValidationResponse;
 import com.github.phillbarber.conductor.stubs.StubServices;
 import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
@@ -8,6 +10,11 @@ import com.netflix.conductor.client.http.WorkflowClient;
 import com.netflix.conductor.common.metadata.workflow.StartWorkflowRequest;
 import com.netflix.conductor.common.metadata.workflow.WorkflowDef;
 import com.netflix.conductor.common.run.Workflow;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.impl.classic.BasicHttpClientResponseHandler;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Ignore;
 import org.junit.jupiter.api.*;
@@ -15,7 +22,6 @@ import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 import org.testcontainers.utility.DockerImageName;
 
 import java.io.IOException;
@@ -73,20 +79,41 @@ public class EndToEndTest {
         stubServices.customerServiceReturnsCustomerFor("12345");
         stubServices.discountServiceReturns();
 
-        String workflowId = startWorkflow(getHappyPathInput());
-        waitForWorkflowToFinish(workflowId);
-        Workflow workflow = getWorkflowClient().getWorkflow(workflowId, true);
-        Map order = (Map) workflow.getOutput().get("order");
-        assertNotNull(order.get("id"));
-        assertNotNull(order.get("customerId"));
-        assertNotNull(order.get("customerName"));
-        assertNotNull(order.get("customerLoyaltyPoints"));
+
+
+
+        Map map = getHappyPathInput();
+        Map orderResponse = null;
+        CloseableHttpClient httpClient = HttpClientBuilder.create().build();
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        HttpPost httpPost = new HttpPost( "http://localhost:8080/order");
+        try {
+            httpPost.setEntity(new StringEntity(objectMapper.writer().writeValueAsString(map)));
+            String execute = httpClient.execute(httpPost, new BasicHttpClientResponseHandler());
+            orderResponse = objectMapper.reader().readValue(execute, Map.class);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+
+
+
+
+//        String workflowId = startWorkflow(getHappyPathInput());
+//        waitForWorkflowToFinish(workflowId);
+//        Workflow workflow = getWorkflowClient().getWorkflow(workflowId, true);
+//
+        assertNotNull(orderResponse.get("id"));
+        assertNotNull(orderResponse.get("customerId"));
+        assertNotNull(orderResponse.get("customerName"));
+        assertNotNull(orderResponse.get("customerLoyaltyPoints"));
         //assertNotNull(getWorkflowClient().getWorkflow(workflowId, true).getOutput().get("car"));
-        assertEquals(order.get("basePrice"), 60000);
-        assertEquals(order.get("totalPrice"), 54000);
-        assertEquals(order.get("currency"), "GBP");
-        assertEquals(order.get("promotionCode"), "ABCDE1234");
-        assertEquals(order.get("discount"), 0.1);
+        assertEquals(orderResponse.get("basePrice"), 60000);
+        assertEquals(orderResponse.get("totalPrice"), 54000);
+        assertEquals(orderResponse.get("currency"), "GBP");
+        assertEquals(orderResponse.get("promotionCode"), "ABCDE1234");
+        assertEquals(orderResponse.get("discount"), 0.1);
     }
 
     @Test

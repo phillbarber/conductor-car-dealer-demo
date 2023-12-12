@@ -18,10 +18,7 @@ public class FacadeLanucher {
 
     public static Server startServer() {
 
-        // scan packages
-        // final ResourceConfig config = new ResourceConfig().packages("com.mkyong");
-
-        final ResourceConfig config = new ResourceConfig(MyResource.class);
+        final ResourceConfig config = new ResourceConfig(OrderResource.class);
         final Server server =
                 JettyHttpContainerFactory.createServer(URI.create(BASE_URI), config);
 
@@ -30,7 +27,6 @@ public class FacadeLanucher {
     }
 
     public static void main(String[] args) {
-        logger.error("WAAAAAAA");
         try {
 
             final Server server = startServer();
@@ -50,10 +46,6 @@ public class FacadeLanucher {
 
             // block and wait shut down signal, like CTRL+C
             Thread.currentThread().join();
-
-            // alternative
-            // Thread.sleep(Long.MAX_VALUE);       // sleep forever...
-            // Thread.sleep(Integer.MAX_VALUE);    // sleep around 60+ years
 
         } catch (Exception ex) {
             logger.error("Some error", ex);
