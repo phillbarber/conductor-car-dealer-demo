@@ -1,6 +1,7 @@
 package com.github.phillbarber.conductor;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.phillbarber.conductor.facade.FacadeLanucher;
 import com.github.phillbarber.conductor.remoteservices.OrderValidationResponse;
 import com.github.phillbarber.conductor.stubs.StubServices;
 import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo;
@@ -69,6 +70,7 @@ public class EndToEndTest {
     public static void start(WireMockRuntimeInfo wmRuntimeInfo) throws IOException {
         launcher = startWorkers(getConductorServerURL(), wmRuntimeInfo.getHttpBaseUrl() );
         initialiseWorkflow();
+        FacadeLanucher.startServer();
     }
 
     @Test
