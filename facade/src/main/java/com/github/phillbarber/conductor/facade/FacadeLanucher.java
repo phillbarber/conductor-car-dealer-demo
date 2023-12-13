@@ -12,24 +12,21 @@ import java.net.URI;
 
 public class FacadeLanucher {
 
-    public static final String BASE_URI = "http://localhost:8080/";
+    public static final String BASE_URI = "http://localhost:8080";
 
     private static final Logger logger = LoggerFactory.getLogger(FacadeLanucher.class);
 
-    public static Server startServer() {
-
-        final ResourceConfig config = new ResourceConfig(OrderResource.class);
-        final Server server =
-                JettyHttpContainerFactory.createServer(URI.create(BASE_URI), config);
-
-        return server;
+    public static void main(String[] args) {
+        startServer();
 
     }
 
-    public static void main(String[] args) {
+    public static void startServer() {
         try {
 
-            final Server server = startServer();
+            final ResourceConfig config = new ResourceConfig(OrderResource.class);
+            final Server server =
+                    JettyHttpContainerFactory.createServer(URI.create(BASE_URI), config);
 
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                 try {
@@ -50,6 +47,5 @@ public class FacadeLanucher {
         } catch (Exception ex) {
             logger.error("Some error", ex);
         }
-
     }
 }
