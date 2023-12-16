@@ -1,11 +1,12 @@
 package com.github.phillbarber.conductor.facade;
 
 
-import org.eclipse.jetty.server.Server;
-import org.glassfish.jersey.jetty.JettyHttpContainerFactory;
-import org.glassfish.jersey.server.ResourceConfig;
+import com.sun.jersey.api.container.grizzly2.GrizzlyServerFactory;
+import com.sun.jersey.api.core.ClassNamesResourceConfig;
+import com.sun.jersey.api.core.ResourceConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.glassfish.grizzly.http.server.HttpServer;
 
 import java.net.URI;
 
@@ -17,6 +18,8 @@ public class FacadeLanucher {
     private static final Logger logger = LoggerFactory.getLogger(FacadeLanucher.class);
 
     public static void main(String[] args) {
+        //javax.xml.bind.JAXBContext.class
+
         startServer();
 
     }
@@ -24,9 +27,8 @@ public class FacadeLanucher {
     public static void startServer() {
         try {
 
-            final ResourceConfig config = new ResourceConfig(OrderResource.class);
-            final Server server =
-                    JettyHttpContainerFactory.createServer(URI.create(BASE_URI), config);
+            final ResourceConfig config = new ClassNamesResourceConfig(OrderResource.class);
+            final HttpServer server =  GrizzlyServerFactory.createHttpServer(BASE_URI, config);
 
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                 try {

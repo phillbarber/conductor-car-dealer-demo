@@ -70,7 +70,12 @@ public class EndToEndTest {
     public static void start(WireMockRuntimeInfo wmRuntimeInfo) throws IOException {
         launcher = startWorkers(getConductorServerURL(), wmRuntimeInfo.getHttpBaseUrl() );
         initialiseWorkflow();
-        FacadeLanucher.startServer();
+        new Thread(){
+            @Override
+            public void run() {
+                FacadeLanucher.startServer();
+            }
+        }.start();//not sure if working
     }
 
     @Test

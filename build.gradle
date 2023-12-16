@@ -27,7 +27,6 @@ allprojects {
     configurations.all {
 
 
-        exclude group: 'javax.ws.rs', module: 'jsr311-api' //this is because netflix conductor imports a version of jersey-client:1.19.4. this jsr311-api conflicts with javax.ws.rs-api/2.1.1 - this all seems to be imported by netflix packages on same version - so very confused.
 
 //        exclude group: 'ch.qos.logback', module: 'logback-core'
 //        exclude group: 'org.apache.logging.log4j', module: 'log4j-to-slf4j'

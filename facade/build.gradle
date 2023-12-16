@@ -30,12 +30,19 @@ dependencies {
     //2.22 works here but then i can't work out how to get hk2 working as it's not in the bom!
 
 
+    implementation 'com.sun.jersey:jersey-server:1.19.4'
+    implementation 'com.sun.jersey:jersey-json:1.19.4'
+    implementation 'com.sun.jersey:jersey-core:1.19.4'
+    implementation 'com.sun.jersey:jersey-grizzly2:1.19.4'
+
+    implementation 'jakarta.xml.bind:jakarta.xml.bind-api:2.3.3' //no clue why I need this - maybe JAXBContext was included in previous versions of java?
+
+    implementation "com.sun.xml.bind:jaxb-core:2.3.0.1"
+    implementation "javax.xml.bind:jaxb-api:2.3.1"
+    implementation "com.sun.xml.bind:jaxb-impl:2.3.1"
 
 
-    implementation 'org.glassfish.jersey.core:jersey-common:3.1.4'
-    implementation 'org.glassfish.jersey.containers:jersey-container-jetty-http:3.1.4'
-    implementation 'org.glassfish.jersey.media:jersey-media-json-jackson:3.1.4'
-    implementation 'org.glassfish.jersey.inject:jersey-hk2:3.1.4'
+
 
 //    implementation 'javax.activation:activation:1.1.1'
 //    implementation 'javax.xml.bind:jaxb-api:2.3.1'
