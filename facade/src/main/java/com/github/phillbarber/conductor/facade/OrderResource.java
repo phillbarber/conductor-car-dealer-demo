@@ -3,36 +3,41 @@ package com.github.phillbarber.conductor.facade;
 
 
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 @Path("/order")
 public class OrderResource {
 
 
+    private final Map mapOfStuff;
+
+    public OrderResource(String message) {
+        mapOfStuff = new HashMap();
+        mapOfStuff.put("message", message);
+
+        System.out.println("NOICE");
+    }
+
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public String createOrder() {
-        return "YAY";
+    public Map createOrder() {
+        return mapOfStuff;
 
     }
 
-    @Path("/all")
-    @GET
+    @POST
     @Produces(MediaType.APPLICATION_JSON)
-    public List<String> helloList() {
+    public Map helloList() {
+        return mapOfStuff;
 
-        List<String> list = new ArrayList<>();
+    }
 
-
-        list.add("xfsdfsdf");
-        list.add("xfsdfsdf");
-        list.add("xfsdfsdf");
-
-        return list;
+    public void stuff(){
 
     }
 

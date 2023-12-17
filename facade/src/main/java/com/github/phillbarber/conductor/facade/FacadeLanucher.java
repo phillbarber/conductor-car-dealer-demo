@@ -3,6 +3,7 @@ package com.github.phillbarber.conductor.facade;
 
 import com.sun.jersey.api.container.grizzly2.GrizzlyServerFactory;
 import com.sun.jersey.api.core.ClassNamesResourceConfig;
+import com.sun.jersey.api.core.DefaultResourceConfig;
 import com.sun.jersey.api.core.ResourceConfig;
 import com.sun.jersey.api.json.JSONConfiguration;
 import org.slf4j.Logger;
@@ -28,9 +29,10 @@ public class FacadeLanucher {
     public static void startServer() {
         try {
 
-            final ResourceConfig config = new ClassNamesResourceConfig(OrderResource.class);
+            final ResourceConfig config = new DefaultResourceConfig();
             config.getFeatures().put(JSONConfiguration.FEATURE_POJO_MAPPING, Boolean.TRUE);
 
+            config.getExplicitRootResources().put("order",new OrderResource("Secret Message"));
             final HttpServer server =  GrizzlyServerFactory.createHttpServer(BASE_URI, config);
 
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {

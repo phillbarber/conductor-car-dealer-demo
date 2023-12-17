@@ -94,23 +94,28 @@ public class EndToEndTest {
         CloseableHttpClient httpClient = HttpClientBuilder.create().build();
         ObjectMapper objectMapper = new ObjectMapper();
 
-        HttpPost httpPost = new HttpPost( "http://localhost:8080/order");
-        try {
-            httpPost.setEntity(new StringEntity(objectMapper.writer().writeValueAsString(map)));
-            String execute = httpClient.execute(httpPost, new BasicHttpClientResponseHandler());
-            orderResponse = objectMapper.reader().readValue(execute, Map.class);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        //rest invocation
+//        HttpPost httpPost = new HttpPost( "http://localhost:8080/order");
+//        try {
+//            httpPost.setEntity(new StringEntity(objectMapper.writer().writeValueAsString(map)));
+//            String execute = httpClient.execute(httpPost, new BasicHttpClientResponseHandler());
+//            orderResponse = objectMapper.reader().readValue(execute, Map.class);
+//        } catch (Exception e) {
+//            throw new RuntimeException(e);
+//        }
 
 
 
 
+//direct workflow invocation
+        String workflowId = startWorkflow(getHappyPathInput());
+        waitForWorkflowToFinish(workflowId);
+        Workflow workflow = getWorkflowClient().getWorkflow(workflowId, true);
+        orderResponse = (Map)workflow.getOutput().get("order");
+//////////////////
 
-//        String workflowId = startWorkflow(getHappyPathInput());
-//        waitForWorkflowToFinish(workflowId);
-//        Workflow workflow = getWorkflowClient().getWorkflow(workflowId, true);
-//
+
+
         assertNotNull(orderResponse.get("id"));
         assertNotNull(orderResponse.get("customerId"));
         assertNotNull(orderResponse.get("customerName"));
