@@ -4,6 +4,7 @@ package com.github.phillbarber.conductor.facade;
 import com.sun.jersey.api.container.grizzly2.GrizzlyServerFactory;
 import com.sun.jersey.api.core.ClassNamesResourceConfig;
 import com.sun.jersey.api.core.ResourceConfig;
+import com.sun.jersey.api.json.JSONConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.glassfish.grizzly.http.server.HttpServer;
@@ -28,6 +29,8 @@ public class FacadeLanucher {
         try {
 
             final ResourceConfig config = new ClassNamesResourceConfig(OrderResource.class);
+            config.getFeatures().put(JSONConfiguration.FEATURE_POJO_MAPPING, Boolean.TRUE);
+
             final HttpServer server =  GrizzlyServerFactory.createHttpServer(BASE_URI, config);
 
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
