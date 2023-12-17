@@ -6,10 +6,7 @@ import com.github.phillbarber.conductor.stubs.StubServices;
 import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import com.netflix.conductor.client.http.MetadataClient;
-import com.netflix.conductor.client.http.WorkflowClient;
-import com.netflix.conductor.common.metadata.workflow.StartWorkflowRequest;
 import com.netflix.conductor.common.metadata.workflow.WorkflowDef;
-import com.netflix.conductor.common.run.Workflow;
 import org.apache.hc.client5.http.classic.HttpClient;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.impl.classic.BasicHttpClientResponseHandler;
@@ -18,21 +15,18 @@ import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.apache.hc.core5.http.message.BasicHeader;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Ignore;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.containers.Network;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.utility.DockerImageName;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.time.Duration;
-import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.*;
 
 
@@ -50,7 +44,7 @@ public class EndToEndTest {
     @Container
     private static GenericContainer redis = dockerContainers.getRedisContainer();
     @Container
-    private  static GenericContainer elastic = dockerContainers.getElasticSearchContainer();
+    private static GenericContainer elastic = dockerContainers.getElasticSearchContainer();
     @Container
     private static GenericContainer conductorServer = dockerContainers.getConductorContainer();
     @Container
@@ -61,11 +55,12 @@ public class EndToEndTest {
     private final HttpClient httpClient = HttpClientBuilder.create().build();
 
     private static Workers workers;
-    private StubServices stubServices = new StubServices();;
+    private StubServices stubServices = new StubServices();
+    ;
 
     @BeforeAll
     public static void start(WireMockRuntimeInfo wmRuntimeInfo) throws IOException {
-        workers = startWorkers(getConductorServerURL(), wmRuntimeInfo.getHttpBaseUrl() );
+        workers = startWorkers(getConductorServerURL(), wmRuntimeInfo.getHttpBaseUrl());
         initialiseWorkflow();
 
         assertTrue(redis.isRunning());
@@ -125,7 +120,7 @@ public class EndToEndTest {
     }
 
     @AfterAll
-    public static void stop(){
+    public static void stop() {
         workers.shutdown();
     }
 
@@ -183,8 +178,5 @@ public class EndToEndTest {
         InputStream resourceAsStream = EndToEndTest.class.getClassLoader().getResourceAsStream(WORKFLOW_JSON_FILE);
         return new ObjectMapper().readValue(resourceAsStream, WorkflowDef.class);
     }
-
-
-
 
 }
