@@ -15,6 +15,7 @@ import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.impl.classic.BasicHttpClientResponseHandler;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.core5.http.Header;
 import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Ignore;
@@ -70,12 +71,9 @@ public class EndToEndTest {
     public static void start(WireMockRuntimeInfo wmRuntimeInfo) throws IOException {
         launcher = startWorkers(getConductorServerURL(), wmRuntimeInfo.getHttpBaseUrl() );
         initialiseWorkflow();
-        new Thread(){
-            @Override
-            public void run() {
-                FacadeLanucher.startServer();
-            }
-        }.start();//not sure if working
+        new Thread(() -> FacadeLanucher.startServer(getConductorServerURL())).start();//not sure if working
+
+        System.out.println("STARTED");
     }
 
     @Test
@@ -94,24 +92,41 @@ public class EndToEndTest {
         CloseableHttpClient httpClient = HttpClientBuilder.create().build();
         ObjectMapper objectMapper = new ObjectMapper();
 
-        //rest invocation
-//        HttpPost httpPost = new HttpPost( "http://localhost:8080/order");
-//        try {
-//            httpPost.setEntity(new StringEntity(objectMapper.writer().writeValueAsString(map)));
-//            String execute = httpClient.execute(httpPost, new BasicHttpClientResponseHandler());
-//            orderResponse = objectMapper.reader().readValue(execute, Map.class);
-//        } catch (Exception e) {
-//            throw new RuntimeException(e);
-//        }
+      //rest invocation
+        HttpPost httpPost = new HttpPost( "http://localhost:8080/order");
+        try {
+
+            httpPost.setEntity(new StringEntity(objectMapper.writer().writeValueAsString(map)));
+            httpPost.setHeader(new Header() {
+                @Override
+                public boolean isSensitive() {
+                    return false;
+                }
+
+                @Override
+                public String getName() {
+                    return "content-type";
+                }
+
+                @Override
+                public String getValue() {
+                    return "application/json";
+                }
+            });
+            String execute = httpClient.execute(httpPost, new BasicHttpClientResponseHandler());
+            orderResponse = objectMapper.reader().readValue(execute, Map.class);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
 
 
 
 
 //direct workflow invocation
-        String workflowId = startWorkflow(getHappyPathInput());
-        waitForWorkflowToFinish(workflowId);
-        Workflow workflow = getWorkflowClient().getWorkflow(workflowId, true);
-        orderResponse = (Map)workflow.getOutput().get("order");
+//        String workflowId = startWorkflow(getHappyPathInput());
+//        waitForWorkflowToFinish(workflowId);
+//        Workflow workflow = getWorkflowClient().getWorkflow(workflowId, true);
+//        orderResponse = (Map)workflow.getOutput().get("order");
 //////////////////
 
 

@@ -1,16 +1,14 @@
 package com.github.phillbarber.conductor.facade;
 
 
+import com.netflix.conductor.client.http.WorkflowClient;
 import com.sun.jersey.api.container.grizzly2.GrizzlyServerFactory;
-import com.sun.jersey.api.core.ClassNamesResourceConfig;
 import com.sun.jersey.api.core.DefaultResourceConfig;
 import com.sun.jersey.api.core.ResourceConfig;
 import com.sun.jersey.api.json.JSONConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.glassfish.grizzly.http.server.HttpServer;
-
-import java.net.URI;
 
 
 public class FacadeLanucher {
@@ -20,39 +18,43 @@ public class FacadeLanucher {
     private static final Logger logger = LoggerFactory.getLogger(FacadeLanucher.class);
 
     public static void main(String[] args) {
-        //javax.xml.bind.JAXBContext.class
-
-        startServer();
-
+        startServer(null);
     }
 
-    public static void startServer() {
+    public static void startServer(String conductorServerURL) {
         try {
 
-            final ResourceConfig config = new DefaultResourceConfig();
-            config.getFeatures().put(JSONConfiguration.FEATURE_POJO_MAPPING, Boolean.TRUE);
-
-            config.getExplicitRootResources().put("order",new OrderResource("Secret Message"));
-            final HttpServer server =  GrizzlyServerFactory.createHttpServer(BASE_URI, config);
+            final HttpServer server =  GrizzlyServerFactory.createHttpServer(BASE_URI, createResourceConfig(conductorServerURL));
+            server.start();
 
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                 try {
-                    System.out.println("Shutting down the application...");
+                    logger.info("Shutting down the application...");
                     server.stop();
-                    System.out.println("Done, exit.");
+                    logger.info("Done, exit.");
                 } catch (Exception e) {
                     logger.error("Error starting server", e);
                 }
             }));
 
-            System.out.println(
+            logger.info(
                     String.format("Application started.%nStop the application using CTRL+C"));
-
-            // block and wait shut down signal, like CTRL+C
-            Thread.currentThread().join();
 
         } catch (Exception ex) {
             logger.error("Some error", ex);
         }
+    }
+
+    private static ResourceConfig createResourceConfig(String conductorServerURL) {
+        final ResourceConfig config = new DefaultResourceConfig();
+        config.getFeatures().put(JSONConfiguration.FEATURE_POJO_MAPPING, Boolean.TRUE);
+        config.getExplicitRootResources().put("order",new OrderResource("Secret Message", getWorkflowClient(conductorServerURL)));
+        return config;
+    }
+
+    private static WorkflowClient getWorkflowClient(String conductorServerURL) {
+        WorkflowClient workflowClient = new WorkflowClient();
+        workflowClient.setRootURI(conductorServerURL);
+        return workflowClient;
     }
 }
