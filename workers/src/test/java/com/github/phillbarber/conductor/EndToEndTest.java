@@ -44,19 +44,17 @@ public class EndToEndTest {
     public static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     public static final String restFacadeURL = "http://localhost:8080";
     public static final String restFacadeOrderURL = restFacadeURL + "/order";
-    private static Network network = Network.newNetwork();
 
-    @Container
-    private static GenericContainer redis = getRedisContainer();
 
+    private static DockerContainers dockerContainers = new DockerContainers();
     @Container
-    private  static GenericContainer elastic = getElasticSearchContainer();
-
+    private static GenericContainer redis = dockerContainers.getRedisContainer();
     @Container
-    private static GenericContainer conductorServer = getConductorContainer();
-
+    private  static GenericContainer elastic = dockerContainers.getElasticSearchContainer();
     @Container
-    private static GenericContainer conductorUI = getConductorUIContainer();
+    private static GenericContainer conductorServer = dockerContainers.getConductorContainer();
+    @Container
+    private static GenericContainer conductorUI = dockerContainers.getConductorUIContainer();
 
     private static FacadeLanucher facadeLanucher = null;
 
@@ -119,7 +117,7 @@ public class EndToEndTest {
 
     @Test
     @Ignore
-    public void unHappyPathOrder() throws IOException, InterruptedException {
+    public void unHappyPathOrder() throws IOException {
         stubServices.orderServiceReturnsInvalidOrderFor("Sentinel");
         Map orderResponse = submitOrderToRestFacade(getUnHappyPathInput());
         assertNull(orderResponse.get("orderId"));
@@ -129,15 +127,6 @@ public class EndToEndTest {
     @AfterAll
     public static void stop(){
         workers.shutdown();
-    }
-
-    private void waitForWorkflowToFinish(String workflowId) {
-        await()
-                .atLeast(Duration.of(1, ChronoUnit.SECONDS))
-                .atMost(Duration.of(10, ChronoUnit.MINUTES))
-                .with()
-                .pollInterval(Duration.of(1, ChronoUnit.SECONDS))
-                .until(() -> getWorkflowClient().getWorkflow(workflowId, true).getStatus() == Workflow.WorkflowStatus.COMPLETED);
     }
 
     private static HashMap getHappyPathInput() throws IOException {
@@ -178,26 +167,6 @@ public class EndToEndTest {
         return workers;
     }
 
-    private String startWorkflow(HashMap input) {
-        WorkflowClient workflowClient = getWorkflowClient();
-        return workflowClient.startWorkflow(getStartWorkflowRequest(input));
-    }
-
-    @NotNull
-    private WorkflowClient getWorkflowClient() {
-        WorkflowClient workflowClient = new WorkflowClient();
-        workflowClient.setRootURI(getConductorServerURL());
-        return workflowClient;
-    }
-
-    @NotNull
-    private static StartWorkflowRequest getStartWorkflowRequest(HashMap input) {
-        StartWorkflowRequest startWorkflowRequest = new StartWorkflowRequest();
-        startWorkflowRequest.setName("CarOrderWorkflow");
-        startWorkflowRequest.setInput(input);
-        return startWorkflowRequest;
-    }
-
     private static void initialiseWorkflow() throws IOException {
         MetadataClient metadataClient = new MetadataClient();
         metadataClient.setRootURI(getConductorServerURL());
@@ -215,42 +184,7 @@ public class EndToEndTest {
         return new ObjectMapper().readValue(resourceAsStream, WorkflowDef.class);
     }
 
-    private static GenericContainer getRedisContainer() {
-        return new GenericContainer(DockerImageName.parse("redis:6.2.3-alpine"))
-                .withExposedPorts(6379)
-                .withNetwork(network)
-                .withNetworkAliases("rs");
-    }
 
-
-    private static GenericContainer getConductorUIContainer() {
-        return new GenericContainer(DockerImageName.parse("conductor:ui"))
-                .withEnv("WF_SERVER", "http://conductor-server:8080")
-                .withExposedPorts(5000, 5000)
-                .withNetwork(network);
-
-    }
-
-    private static GenericContainer getElasticSearchContainer() {
-        return new GenericContainer(DockerImageName.parse("elasticsearch:6.8.15"))
-                .withEnv("transport.host", "0.0.0.0")
-                .withEnv("discovery.type", "single-node")
-                .withEnv("xpack.security.enabled", "false")
-                .withEnv("ES_JAVA_OPTS", "-Xms512m -Xmx1024m")
-                .withExposedPorts(9200, 9300)
-                .withNetwork(network)
-                .withNetworkAliases("es");
-    }
-
-    //Not specifying the config properties file
-
-    private static GenericContainer getConductorContainer() {
-        return new GenericContainer(DockerImageName.parse("conductor:server"))
-                .withEnv("CONFIG_PROP", "config-local.properties")//this corresponds to https://github.com/Netflix/conductor/blob/f013a53b345b21e890790c8b7a316a34d992fc2e/docker/server/config/config-local.properties
-                .withExposedPorts(8080)
-                .withNetworkAliases("conductor-server")
-                .withNetwork(network);
-    }
 
 
 }
