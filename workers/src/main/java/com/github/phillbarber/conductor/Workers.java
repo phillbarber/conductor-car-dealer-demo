@@ -15,7 +15,7 @@ import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import java.util.Arrays;
 import java.util.List;
 
-public class Launcher {
+public class Workers {
 
     private final TaskClient taskClient;
     private final List<Worker> workers;
@@ -23,7 +23,7 @@ public class Launcher {
 
     private final String serviceRootURI;
 
-    public Launcher(String conductorRootURI, String serviceRootURI) {
+    public Workers(String conductorRootURI, String serviceRootURI) {
         this.taskClient = createClient(conductorRootURI);
         this.serviceRootURI = serviceRootURI;
         this.workers = getWorkers();

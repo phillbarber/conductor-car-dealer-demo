@@ -10,23 +10,32 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.glassfish.grizzly.http.server.HttpServer;
 
+import java.io.IOException;
+
 
 public class FacadeLanucher {
 
-    public static final String BASE_URI = "http://localhost:8080";
+    private final  String restFacadeURL;
+    private final String conductorServerURL;
+
+    private final HttpServer server;
 
     private static final Logger logger = LoggerFactory.getLogger(FacadeLanucher.class);
 
-    public static void main(String[] args) {
-        startServer(null);
+    public FacadeLanucher(String restFacadeURL, String conductorServerURL) {
+        this.restFacadeURL = restFacadeURL;
+        this.conductorServerURL = conductorServerURL;
+        try {
+            server =  GrizzlyServerFactory.createHttpServer(restFacadeURL, createResourceConfig(conductorServerURL));
+        } catch (IOException e) {
+
+            throw new RuntimeException(e);
+        }
     }
 
-    public static void startServer(String conductorServerURL) {
+    public void startServer() {
         try {
-
-            final HttpServer server =  GrizzlyServerFactory.createHttpServer(BASE_URI, createResourceConfig(conductorServerURL));
             server.start();
-
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                 try {
                     logger.info("Shutting down the application...");
@@ -43,6 +52,10 @@ public class FacadeLanucher {
         } catch (Exception ex) {
             logger.error("Some error", ex);
         }
+    }
+
+    public boolean isRunning(){
+        return server.isStarted();
     }
 
     private static ResourceConfig createResourceConfig(String conductorServerURL) {

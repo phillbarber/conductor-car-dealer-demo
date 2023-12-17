@@ -2,7 +2,6 @@ package com.github.phillbarber.conductor;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.phillbarber.conductor.facade.FacadeLanucher;
-import com.github.phillbarber.conductor.remoteservices.OrderValidationResponse;
 import com.github.phillbarber.conductor.stubs.StubServices;
 import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
@@ -11,12 +10,12 @@ import com.netflix.conductor.client.http.WorkflowClient;
 import com.netflix.conductor.common.metadata.workflow.StartWorkflowRequest;
 import com.netflix.conductor.common.metadata.workflow.WorkflowDef;
 import com.netflix.conductor.common.run.Workflow;
+import org.apache.hc.client5.http.classic.HttpClient;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.impl.classic.BasicHttpClientResponseHandler;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
-import org.apache.hc.core5.http.Header;
 import org.apache.hc.core5.http.io.entity.StringEntity;
+import org.apache.hc.core5.http.message.BasicHeader;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Ignore;
 import org.junit.jupiter.api.*;
@@ -42,6 +41,9 @@ import static org.junit.jupiter.api.Assertions.*;
 public class EndToEndTest {
 
     public static final String WORKFLOW_JSON_FILE = "workflows/car-order-workflow.json";
+    public static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    public static final String restFacadeURL = "http://localhost:8080";
+    public static final String restFacadeOrderURL = restFacadeURL + "/order";
     private static Network network = Network.newNetwork();
 
     @Container
@@ -56,107 +58,77 @@ public class EndToEndTest {
     @Container
     private static GenericContainer conductorUI = getConductorUIContainer();
 
-    private static Launcher launcher;
+    private static FacadeLanucher facadeLanucher = null;
+
+    private final HttpClient httpClient = HttpClientBuilder.create().build();
+
+    private static Workers workers;
     private StubServices stubServices = new StubServices();;
 
     @BeforeAll
-    public static void checkAllRunning() {
+    public static void start(WireMockRuntimeInfo wmRuntimeInfo) throws IOException {
+        workers = startWorkers(getConductorServerURL(), wmRuntimeInfo.getHttpBaseUrl() );
+        initialiseWorkflow();
+
         assertTrue(redis.isRunning());
         assertTrue(conductorServer.isRunning());
         assertTrue(elastic.isRunning());
         assertTrue(conductorUI.isRunning());
-    }
 
-    @BeforeAll
-    public static void start(WireMockRuntimeInfo wmRuntimeInfo) throws IOException {
-        launcher = startWorkers(getConductorServerURL(), wmRuntimeInfo.getHttpBaseUrl() );
-        initialiseWorkflow();
-        new Thread(() -> FacadeLanucher.startServer(getConductorServerURL())).start();//not sure if working
-
-        System.out.println("STARTED");
+        facadeLanucher = new FacadeLanucher(restFacadeURL, getConductorServerURL());
+        new Thread(() -> facadeLanucher.startServer()).start();
+        assertTrue(facadeLanucher.isRunning());
     }
 
     @Test
-    public void happyPathOrder() throws IOException, InterruptedException {
+    public void happyPathOrder() throws IOException {
         stubServices.orderServiceReturnsValidOrderFor("Blista");
         stubServices.saveOrderReturnsOK();
         stubServices.priceServiceReturnsPrice();
         stubServices.customerServiceReturnsCustomerFor("12345");
         stubServices.discountServiceReturns();
 
+        Map order = (Map) submitOrderToRestFacade(getHappyPathInput()).get("order");
 
+        assertNotNull(order.get("id"));
+        assertNotNull(order.get("customerId"));
+        assertNotNull(order.get("customerName"));
+        assertNotNull(order.get("customerLoyaltyPoints"));
+        assertEquals(order.get("basePrice"), 60000);
+        assertEquals(order.get("totalPrice"), 54000);
+        assertEquals(order.get("currency"), "GBP");
+        assertEquals(order.get("promotionCode"), "ABCDE1234");
+        assertEquals(order.get("discount"), 0.1);
+    }
 
+    private Map submitOrderToRestFacade(HashMap happyPathInput) {
 
-        Map map = getHappyPathInput();
-        Map orderResponse = null;
-        CloseableHttpClient httpClient = HttpClientBuilder.create().build();
-        ObjectMapper objectMapper = new ObjectMapper();
-
-      //rest invocation
-        HttpPost httpPost = new HttpPost( "http://localhost:8080/order");
+        Map order;
+        HttpPost httpPost = new HttpPost(restFacadeOrderURL);
         try {
 
-            httpPost.setEntity(new StringEntity(objectMapper.writer().writeValueAsString(map)));
-            httpPost.setHeader(new Header() {
-                @Override
-                public boolean isSensitive() {
-                    return false;
-                }
-
-                @Override
-                public String getName() {
-                    return "content-type";
-                }
-
-                @Override
-                public String getValue() {
-                    return "application/json";
-                }
-            });
+            httpPost.setEntity(new StringEntity(OBJECT_MAPPER.writer().writeValueAsString(happyPathInput)));
+            httpPost.setHeader(new BasicHeader("content-type", "application/json"));
             String execute = httpClient.execute(httpPost, new BasicHttpClientResponseHandler());
-            orderResponse = objectMapper.reader().readValue(execute, Map.class);
+            order = OBJECT_MAPPER.reader().readValue(execute, Map.class);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-
-
-
-
-//direct workflow invocation
-//        String workflowId = startWorkflow(getHappyPathInput());
-//        waitForWorkflowToFinish(workflowId);
-//        Workflow workflow = getWorkflowClient().getWorkflow(workflowId, true);
-//        orderResponse = (Map)workflow.getOutput().get("order");
-//////////////////
-
-
-
-        assertNotNull(orderResponse.get("id"));
-        assertNotNull(orderResponse.get("customerId"));
-        assertNotNull(orderResponse.get("customerName"));
-        assertNotNull(orderResponse.get("customerLoyaltyPoints"));
-        //assertNotNull(getWorkflowClient().getWorkflow(workflowId, true).getOutput().get("car"));
-        assertEquals(orderResponse.get("basePrice"), 60000);
-        assertEquals(orderResponse.get("totalPrice"), 54000);
-        assertEquals(orderResponse.get("currency"), "GBP");
-        assertEquals(orderResponse.get("promotionCode"), "ABCDE1234");
-        assertEquals(orderResponse.get("discount"), 0.1);
+        return order;
     }
 
     @Test
     @Ignore
     public void unHappyPathOrder() throws IOException, InterruptedException {
         stubServices.orderServiceReturnsInvalidOrderFor("Sentinel");
-        String workflowId = startWorkflow(getUnHappyPathInput());
-        waitForWorkflowToFinish(workflowId);
-        Map<String, Object> workflowOutput = getWorkflowClient().getWorkflow(workflowId, true).getOutput();
-        assertNull(workflowOutput.get("orderId"));
-        assertNotNull(workflowOutput.get("rejection"));
+        Map orderResponse = submitOrderToRestFacade(getUnHappyPathInput());
+        assertNull(orderResponse.get("orderId"));
+        assertNotNull(orderResponse.get("rejection"));
     }
 
     @AfterAll
     public static void stop(){
-        launcher.shutdown();
+        workers.shutdown();
     }
 
     private void waitForWorkflowToFinish(String workflowId) {
@@ -200,10 +172,10 @@ public class EndToEndTest {
                 """, HashMap.class);
     }
 
-    private static Launcher startWorkers(String conductorServerURL, String serviceRootURI) {
-        Launcher launcher = new Launcher(conductorServerURL, serviceRootURI);
-        new Thread(launcher::start).start();
-        return launcher;
+    private static Workers startWorkers(String conductorServerURL, String serviceRootURI) {
+        Workers workers = new Workers(conductorServerURL, serviceRootURI);
+        new Thread(workers::start).start();
+        return workers;
     }
 
     private String startWorkflow(HashMap input) {
